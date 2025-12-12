@@ -24,7 +24,7 @@ createAppKit({
   adapters: [ethersAdapter],
   metadata,
   networks: [mainnet, sepolia],
-  defaultNetwork: mainnet, // 默认网络设为 Sepolia 测试网
+  defaultNetwork: mainnet,
   projectId,
   features: {
     analytics: true,

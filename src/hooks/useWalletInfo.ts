@@ -22,6 +22,8 @@ export interface WalletInfo {
 	walletProvider: Eip1193Provider | undefined;
 	/** 获取 BrowserProvider 实例 */
 	getProvider: () => BrowserProvider | null;
+	/** 获取 Signer 实例（用于签名交易） */
+	getSigner: () => Promise<import("ethers").JsonRpcSigner | null>;
 }
 
 /**
@@ -50,6 +52,15 @@ export function useWalletInfo(): WalletInfo {
 		};
 	}, [walletProvider]);
 
+	// 获取 Signer 实例
+	const getSigner = useMemo(() => {
+		return async () => {
+			const provider = getProvider();
+			if (!provider) return null;
+			return await provider.getSigner();
+		};
+	}, [getProvider]);
+
 	return {
 		address,
 		isConnected,
@@ -57,5 +68,6 @@ export function useWalletInfo(): WalletInfo {
 		isSupportedChain,
 		walletProvider: walletProvider as Eip1193Provider | undefined,
 		getProvider,
+		getSigner,
 	};
 }

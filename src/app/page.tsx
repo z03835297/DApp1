@@ -1,11 +1,9 @@
 "use client";
 import Navbar from "@/components/Navbar";
 import ActionPanel from "@/components/ActionPanel";
-import { useAppKitNetwork } from "@reown/appkit/react";
 
 export default function Home() {
-  const { chainId } = useAppKitNetwork();
-  console.log(chainId)
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">
       <Navbar />
