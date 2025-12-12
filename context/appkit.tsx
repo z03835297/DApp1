@@ -16,18 +16,22 @@ const metadata = {
   icons: ["/favicon.ico"],
 };
 
-// 3. Create the AppKit instance
+// 3. 创建 EthersAdapter
+const ethersAdapter = new EthersAdapter();
+
+// 4. Create the AppKit instance
 createAppKit({
-  adapters: [new EthersAdapter()],
+  adapters: [ethersAdapter],
   metadata,
   networks: [mainnet, sepolia],
+  defaultNetwork: mainnet, // 默认网络设为 Sepolia 测试网
   projectId,
   features: {
     analytics: true,
   },
 });
 
-// 4. Export the provider component
+// 5. Export the provider component
 export function AppKitProvider({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
