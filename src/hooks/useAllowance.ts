@@ -47,33 +47,21 @@ function isValidAmount(amount: string): boolean {
 }
 
 /**
- * 获取用户友好的错误消息
+ * 获取原始错误消息（用于开发调试）
  * @param err 原始错误
  * @param defaultMsg 默认消息
- * @returns 用户友好的错误消息
+ * @returns 原始错误消息
  */
 function getErrorMessage(err: unknown, defaultMsg: string): string {
-	const message = err instanceof Error ? err.message.toLowerCase() : "";
-
-	if (message.includes("user rejected") || message.includes("user denied")) {
-		return "交易被用户取消";
+	if (err instanceof Error) {
+		return err.message;
 	}
-	if (message.includes("insufficient funds for gas")) {
-		return "Gas 费用不足，请确保有足够的 ETH";
+	if (typeof err === "string") {
+		return err;
 	}
-	if (message.includes("insufficient") || message.includes("balance")) {
-		return "余额不足";
+	if (err && typeof err === "object" && "message" in err) {
+		return String((err as { message: unknown }).message);
 	}
-	if (message.includes("nonce")) {
-		return "交易 Nonce 错误，请刷新页面重试";
-	}
-	if (message.includes("timeout") || message.includes("timed out")) {
-		return "交易超时，请稍后重试";
-	}
-	if (message.includes("network") || message.includes("connection")) {
-		return "网络连接错误，请检查网络后重试";
-	}
-
 	return defaultMsg;
 }
 
@@ -160,7 +148,7 @@ export function useAllowance(): UseVaultReturn {
 				return false;
 			}
 
-			if (!usdtAddress || !usdtAbi || !vaultAddress) {
+			if (!usdtAddress || !usdtAbi || !vaultAddress || !userAddress) {
 				setError("合约未初始化");
 				return false;
 			}
@@ -185,6 +173,28 @@ export function useAllowance(): UseVaultReturn {
 				// 将输入金额转换为合约需要的格式
 				const approveAmount = parseUnits(amount, dec);
 
+				// 检查当前授权额度
+				const currentAllowance = await usdtWithSigner.allowance(
+					userAddress,
+					vaultAddress,
+				);
+
+				// 如果授权额度已经足够，直接跳过授权步骤
+				if (currentAllowance >= approveAmount) {
+					console.log("Allowance already sufficient, skipping approve");
+					setIsApproved(true);
+					setApprovedAmount(amount);
+					return true;
+				}
+
+				// 官方 USDT 合约要求：如果已有非零授权但不够用，需要先重置为 0
+				// 这是为了防止 "approve race condition" 攻击
+				if (currentAllowance > BigInt(0)) {
+					console.log("Resetting existing allowance to 0 first...");
+					const resetTx = await usdtWithSigner.approve(vaultAddress, 0);
+					await resetTx.wait(1);
+				}
+
 				// 执行授权
 				const tx = await usdtWithSigner.approve(vaultAddress, approveAmount);
 				// 等待 2 个区块确认以提高安全性
@@ -201,7 +211,7 @@ export function useAllowance(): UseVaultReturn {
 				setIsApproving(false);
 			}
 		},
-		[usdtAddress, usdtAbi, vaultAddress, getSigner, fetchDecimals],
+		[usdtAddress, usdtAbi, vaultAddress, userAddress, getSigner, fetchDecimals],
 	);
 
 	// Step 2: 执行 Vault mint
