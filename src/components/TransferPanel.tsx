@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useWalletInfo, useTokenInfo } from "@/hooks";
+import { useWalletInfo, useTokenInfo, useTransfer } from "@/hooks";
 
 interface TransferPanelProps {
 	onSuccess?: () => void;
@@ -10,44 +10,38 @@ interface TransferPanelProps {
 export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 	const [recipient, setRecipient] = useState("");
 	const [amount, setAmount] = useState("");
-	const [isTransferring, setIsTransferring] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 
 	const { isConnected } = useWalletInfo();
 	const { tokenInfo } = useTokenInfo();
+	const {
+		isTransferring,
+		transfer,
+		error,
+		clearError,
+	} = useTransfer();
 
-	// 验证地址格式
-	const isValidAddress = (address: string) => {
-		return /^0x[a-fA-F0-9]{40}$/.test(address);
+	// 处理接收地址变化
+	const handleRecipientChange = (value: string) => {
+		if (error) clearError();
+		setRecipient(value);
+	};
+
+	// 处理金额变化
+	const handleAmountChange = (value: string) => {
+		if (error) clearError();
+		setAmount(value);
 	};
 
 	// 处理转账
 	const handleTransfer = async () => {
 		if (!recipient || !amount) return;
 
-		if (!isValidAddress(recipient)) {
-			setError("请输入有效的钱包地址");
-			return;
-		}
+		const success = await transfer(recipient, amount);
 
-		setError(null);
-		setIsTransferring(true);
-
-		try {
-			// TODO: 实现 V2 免费转账逻辑
-			// 这里需要调用 V2 合约的转账方法
-			console.log("Transfer:", { recipient, amount });
-
-			// 模拟转账成功
-			await new Promise((resolve) => setTimeout(resolve, 2000));
-
+		if (success) {
 			setRecipient("");
 			setAmount("");
 			onSuccess?.();
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "转账失败");
-		} finally {
-			setIsTransferring(false);
 		}
 	};
 
@@ -100,7 +94,7 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 					id="recipient-address"
 					type="text"
 					value={recipient}
-					onChange={(e) => setRecipient(e.target.value)}
+					onChange={(e) => handleRecipientChange(e.target.value)}
 					placeholder="0x..."
 					disabled={isTransferring}
 					className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-600/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all disabled:opacity-50"
@@ -120,7 +114,7 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 						id="transfer-amount"
 						type="number"
 						value={amount}
-						onChange={(e) => setAmount(e.target.value)}
+						onChange={(e) => handleAmountChange(e.target.value)}
 						placeholder="0.0"
 						min="0"
 						step="any"
