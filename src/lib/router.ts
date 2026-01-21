@@ -3,8 +3,7 @@
  * 用于配置默认版本和路由相关设置
  */
 
-// 版本类型
-export type AppVersion = "v1" | "v2";
+import type { AppVersion, Feature } from "./type";
 
 // 路由配置
 export const routerConfig = {
@@ -18,12 +17,16 @@ export const routerConfig = {
 			path: "/v1",
 			description: "稳定版本",
 			isStable: true,
+			// V1 支持的功能
+			features: ["mint", "withdraw"] as Feature[],
 		},
 		v2: {
 			name: "V2",
 			path: "/v2",
-			description: "测试版本 - 新功能体验",
+			description: "免 Gas 转账",
 			isStable: false,
+			// V2 支持的功能（多了 transfer）
+			features: ["mint", "withdraw", "transfer"] as Feature[],
 		},
 	},
 } as const;
@@ -49,4 +52,14 @@ export function getAllVersions() {
 // 检查是否为有效版本
 export function isValidVersion(version: string): version is AppVersion {
 	return version === "v1" || version === "v2";
+}
+
+// 检查版本是否支持某功能
+export function hasFeature(version: AppVersion, feature: Feature): boolean {
+	return routerConfig.versions[version].features.includes(feature);
+}
+
+// 获取版本支持的所有功能
+export function getFeatures(version: AppVersion): readonly Feature[] {
+	return routerConfig.versions[version].features;
 }

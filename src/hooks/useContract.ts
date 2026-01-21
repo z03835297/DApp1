@@ -2,9 +2,10 @@
 
 import { useMemo } from "react";
 import { Contract, type ContractRunner } from "ethers";
-import { CONTRACT_ADDRESS, ABI, type ChainId } from "@/lib/constants";
-import { ContractName } from "@/lib/type";
+import { CONTRACT_ADDRESS, ABI, ChainId } from "@/lib/constants";
+import { ContractName, type AppVersion } from "@/lib/type";
 import { useWalletInfo } from "./useWalletInfo";
+import { useVersion } from "@/context";
 
 export interface ContractConfig {
 	/** 合约名称 */
@@ -27,22 +28,36 @@ export interface UseContractReturn {
 /**
  * 合约实例 Hook
  * 封装合约实例的创建和管理
+ * 自动根据当前版本获取对应的合约配置
  */
 export function useContract(config: ContractConfig): UseContractReturn {
 	const { contractName } = config;
+	const version = useVersion(); // 从 context 获取当前版本
 	const { chainId, isSupportedChain, getProvider } = useWalletInfo();
 
-	// 获取合约地址
+	// 获取合约地址（根据版本）
 	const contractAddress = useMemo(() => {
 		if (!isSupportedChain || !chainId) return null;
-		return CONTRACT_ADDRESS[chainId as ChainId]?.[contractName] ?? null;
-	}, [chainId, isSupportedChain, contractName]);
+		const typedChainId = chainId as ChainId;
+		const typedVersion = version as AppVersion;
+		const chainContracts = CONTRACT_ADDRESS[typedChainId];
+		if (!chainContracts) return null;
+		const versionContracts = chainContracts[typedVersion];
+		if (!versionContracts) return null;
+		return versionContracts[contractName] ?? null;
+	}, [chainId, isSupportedChain, contractName, version]);
 
-	// 获取合约 ABI
+	// 获取合约 ABI（根据版本）
 	const contractAbi = useMemo(() => {
 		if (!isSupportedChain || !chainId) return null;
-		return ABI[chainId as ChainId]?.[contractName] ?? null;
-	}, [chainId, isSupportedChain, contractName]);
+		const typedChainId = chainId as ChainId;
+		const typedVersion = version as AppVersion;
+		const chainAbis = ABI[typedChainId];
+		if (!chainAbis) return null;
+		const versionAbis = chainAbis[typedVersion];
+		if (!versionAbis) return null;
+		return versionAbis[contractName] ?? null;
+	}, [chainId, isSupportedChain, contractName, version]);
 
 	// 创建合约实例
 	const contract = useMemo(() => {
