@@ -15,7 +15,7 @@ export default function V2Page() {
               Token Operations V2
             </h1>
             <p className="text-zinc-400 max-w-md mx-auto">
-              免 gas 转账
+              免 Gas 转账
             </p>
           </div>
 
