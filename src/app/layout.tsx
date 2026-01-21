@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WDB888 DApp",
-  description: "WDB888 DApp",
+  title: "WDB DApp",
+  description: "WDB DApp",
 };
 
 export default function RootLayout({

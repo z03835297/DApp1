@@ -10,8 +10,8 @@ const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || "";
 
 // 2. Create a metadata object
 const metadata = {
-  name: "WDB888 DApp",
-  description: "WDB888 DApp",
+  name: "WDB DApp",
+  description: "WDB DApp",
   url: typeof window !== "undefined" ? window.location.origin : "https://localhost:3000",
   icons: ["/favicon.ico"],
 };
