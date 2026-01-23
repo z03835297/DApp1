@@ -2,6 +2,9 @@ import type { VersionedContracts, AppVersion } from "./type";
 import { ContractName } from "./type";
 import { v1, v2, USDT_ABI, MUSDT_ABI, VAULT_ABI } from "./abi";
 
+/** V2 转账手续费（单位：token） */
+export const TRANSFER_FEE = 2;
+
 export enum ChainId {
 	MAINNET = 1,
 	SEPOLIA = 11155111,

@@ -7,6 +7,7 @@ import {
 	useTransferWithAuth,
 	useTokenBalance,
 } from "@/hooks";
+import { TRANSFER_FEE } from "@/lib/constants";
 
 interface TransferPanelProps {
 	onSuccess?: () => void;
@@ -38,9 +39,10 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 		setAmount(value);
 	};
 
-	// 设置最大值
+	// 设置最大值（扣除手续费）
 	const handleSetMax = () => {
-		setAmount(tokenBalance);
+		const maxAmount = Math.max(0, Number(tokenBalance) - TRANSFER_FEE);
+		setAmount(maxAmount.toString());
 	};
 
 	// 处理签名转账
@@ -147,6 +149,37 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 				</div>
 			</div>
 
+			{/* 手续费和总计显示 */}
+			{amount && Number(amount) > 0 && (
+				<div className="bg-zinc-800/30 rounded-lg p-3 border border-zinc-700/30 space-y-2">
+					<div className="flex items-center justify-between text-sm">
+						<span className="text-zinc-400">转账金额</span>
+						<span className="text-white">
+							{Number(amount).toLocaleString()} {tokenInfo.symbol}
+						</span>
+					</div>
+					<div className="flex items-center justify-between text-sm">
+						<span className="text-zinc-400">手续费</span>
+						<span className="text-yellow-400">
+							+ {TRANSFER_FEE} {tokenInfo.symbol}
+						</span>
+					</div>
+					<div className="border-t border-zinc-700/50 pt-2 flex items-center justify-between text-sm font-medium">
+						<span className="text-zinc-300">总计扣除</span>
+						<span className="text-white">
+							{(Number(amount) + TRANSFER_FEE).toLocaleString()} {tokenInfo.symbol}
+						</span>
+					</div>
+					{/* 余额不足警告 */}
+					{Number(amount) + TRANSFER_FEE > Number(tokenBalance) && (
+						<p className="text-xs text-red-400">
+							余额不足，需要 {(Number(amount) + TRANSFER_FEE).toLocaleString()}{" "}
+							{tokenInfo.symbol}
+						</p>
+					)}
+				</div>
+			)}
+
 			{/* 错误信息显示 */}
 			{error && (
 				<div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
@@ -158,7 +191,13 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 			<button
 				type="button"
 				onClick={handleTransfer}
-				disabled={isSigning || !recipient || !amount || !isConnected}
+				disabled={
+					isSigning ||
+					!recipient ||
+					!amount ||
+					!isConnected ||
+					Number(amount) + TRANSFER_FEE > Number(tokenBalance)
+				}
 				className="w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg shadow-indigo-500/25 disabled:opacity-50"
 			>
 				{isSigning ? (

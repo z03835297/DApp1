@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { parseUnits, randomBytes, hexlify, Signature } from "ethers";
 import { useWalletInfo } from "./useWalletInfo";
 import { useTokenContract } from "./useContract";
+import { TRANSFER_FEE } from "@/lib/constants";
 
 export interface TransferAuthPayload {
 	/** 发送者地址 */
@@ -94,9 +95,12 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 				return null;
 			}
 
-			// 余额验证（如果提供了余额）
-			if (userBalance !== undefined && Number(amount) > Number(userBalance)) {
-				setError("输入金额超过可用余额");
+			// 余额验证（如果提供了余额）- 需要检查 金额 + 手续费
+			if (
+				userBalance !== undefined &&
+				Number(amount) + TRANSFER_FEE > Number(userBalance)
+			) {
+				setError(`余额不足（需要额外 ${TRANSFER_FEE} token 手续费）`);
 				return null;
 			}
 
@@ -125,7 +129,7 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 				// 设置时间窗口 (validAfter: 现在, validBefore: 5分钟后)
 				const now = Math.floor(Date.now() / 1000);
 				const validAfter = now;
-				const validBefore = now + 300; // 5 分钟有效期
+				const validBefore = now + 900; // 5 分钟有效期
 
 				// 获取 EIP-712 domain 信息
 				// eip712Domain() 返回: [fields, name, version, chainId, verifyingContract, salt, extensions]
