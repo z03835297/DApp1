@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useWalletInfo, useTokenInfo, useTransfer } from "@/hooks";
+import {
+	useWalletInfo,
+	useTokenInfo,
+	useTransferWithAuth,
+	useTokenBalance,
+} from "@/hooks";
 
 interface TransferPanelProps {
 	onSuccess?: () => void;
@@ -14,11 +19,12 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 	const { isConnected } = useWalletInfo();
 	const { tokenInfo } = useTokenInfo();
 	const {
-		isTransferring,
-		transfer,
-		error,
-		clearError,
-	} = useTransfer();
+		balance: tokenBalance,
+		isLoading: isLoadingBalance,
+		refresh: refreshBalance,
+	} = useTokenBalance();
+	const { isSigning, signTransferAuth, payload, error, clearError } =
+		useTransferWithAuth();
 
 	// 处理接收地址变化
 	const handleRecipientChange = (value: string) => {
@@ -32,15 +38,21 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 		setAmount(value);
 	};
 
-	// 处理转账
+	// 设置最大值
+	const handleSetMax = () => {
+		setAmount(tokenBalance);
+	};
+
+	// 处理签名转账
 	const handleTransfer = async () => {
 		if (!recipient || !amount) return;
 
-		const success = await transfer(recipient, amount);
+		const result = await signTransferAuth(recipient, amount, tokenBalance);
 
-		if (success) {
+		if (result) {
 			setRecipient("");
 			setAmount("");
+			await refreshBalance();
 			onSuccess?.();
 		}
 	};
@@ -53,32 +65,32 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 				<p className="text-sm text-zinc-400">V2 专属功能 - 零 Gas 费转账</p>
 			</div>
 
-			{/* 功能说明 */}
-			<div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4">
-				<div className="flex items-start gap-3">
-					<div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
-						<svg
-							className="w-4 h-4 text-indigo-400"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							aria-hidden="true"
-						>
-							<title>信息</title>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth={2}
-								d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
-					</div>
-					<div>
-						<p className="text-sm text-indigo-300 font-medium">免 Gas 转账</p>
-						<p className="text-xs text-indigo-400/70 mt-1">
-							使用 V2 合约进行转账，无需支付 Gas 费用
-						</p>
-					</div>
+			{/* 余额显示 */}
+			<div className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-700/30">
+				<div className="flex items-center justify-between mb-2">
+					<span className="text-sm text-zinc-400">{tokenInfo.name} 余额</span>
+					<button
+						type="button"
+						onClick={refreshBalance}
+						disabled={isLoadingBalance || !isConnected}
+						className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors disabled:opacity-50"
+					>
+						{isLoadingBalance ? "刷新中..." : "刷新"}
+					</button>
+				</div>
+				<div className="flex items-baseline gap-2">
+					<span className="text-2xl font-bold text-white">
+						{isLoadingBalance ? (
+							<span className="inline-block w-20 h-7 bg-zinc-700 rounded animate-pulse" />
+						) : !isConnected ? (
+							"-"
+						) : (
+							Number(tokenBalance).toLocaleString(undefined, {
+								maximumFractionDigits: 6,
+							})
+						)}
+					</span>
+					<span className="text-sm text-zinc-400">{tokenInfo.symbol}</span>
 				</div>
 			</div>
 
@@ -96,7 +108,7 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 					value={recipient}
 					onChange={(e) => handleRecipientChange(e.target.value)}
 					placeholder="0x..."
-					disabled={isTransferring}
+					disabled={isSigning}
 					className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-600/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all disabled:opacity-50"
 				/>
 			</div>
@@ -118,12 +130,20 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 						placeholder="0.0"
 						min="0"
 						step="any"
-						disabled={isTransferring}
-						className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-600/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+						disabled={isSigning}
+						className="w-full px-4 py-3 pr-24 bg-zinc-800/50 border border-zinc-600/50 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 					/>
-					<span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-400">
-						{tokenInfo.symbol}
-					</span>
+					<div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+						<button
+							type="button"
+							onClick={handleSetMax}
+							disabled={!isConnected || isSigning}
+							className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							MAX
+						</button>
+						<span className="text-sm text-zinc-400">{tokenInfo.symbol}</span>
+					</div>
 				</div>
 			</div>
 
@@ -138,12 +158,10 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 			<button
 				type="button"
 				onClick={handleTransfer}
-				disabled={
-					isTransferring || !recipient || !amount || !isConnected
-				}
+				disabled={isSigning || !recipient || !amount || !isConnected}
 				className="w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 shadow-lg shadow-indigo-500/25 disabled:opacity-50"
 			>
-				{isTransferring ? (
+				{isSigning ? (
 					<span className="flex items-center gap-2">
 						<svg
 							aria-hidden="true"
@@ -166,12 +184,46 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 							/>
 						</svg>
-						转账中...
+						签名中...
 					</span>
 				) : (
-					<span>发送 {tokenInfo.symbol}</span>
+					<span>签名转账 {tokenInfo.symbol}</span>
 				)}
 			</button>
+
+			{/* 签名结果显示 */}
+			{payload && (
+				<div className="bg-zinc-800/50 border border-zinc-600/50 rounded-xl p-4 space-y-2">
+					<div className="flex items-center justify-between">
+						<h4 className="text-sm font-medium text-green-400">
+							签名成功
+						</h4>
+						<span className="text-xs text-zinc-500">
+							已输出到控制台
+						</span>
+					</div>
+					<div className="text-xs text-zinc-400 space-y-1">
+						<p>
+							<span className="text-zinc-500">From:</span>{" "}
+							{payload.from.slice(0, 10)}...{payload.from.slice(-8)}
+						</p>
+						<p>
+							<span className="text-zinc-500">To:</span>{" "}
+							{payload.to.slice(0, 10)}...{payload.to.slice(-8)}
+						</p>
+						<p>
+							<span className="text-zinc-500">Value:</span> {payload.value}
+						</p>
+						<p>
+							<span className="text-zinc-500">Nonce:</span>{" "}
+							{payload.nonce.slice(0, 18)}...
+						</p>
+					</div>
+					<pre className="mt-2 p-2 bg-zinc-900/50 rounded-lg text-xs text-zinc-300 overflow-x-auto max-h-40 overflow-y-auto">
+						{JSON.stringify(payload, null, 2)}
+					</pre>
+				</div>
+			)}
 
 			{/* 提示信息 */}
 			<p className="text-xs text-center text-zinc-500">

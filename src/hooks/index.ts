@@ -33,3 +33,10 @@ export { useWithdraw, type UseWithdrawReturn } from "./useWithdraw";
 
 // Transfer 相关
 export { useTransfer, type UseTransferReturn } from "./useTransfer";
+
+// TransferWithAuthorization 相关 (EIP-3009)
+export {
+	useTransferWithAuth,
+	type TransferAuthPayload,
+	type UseTransferWithAuthReturn,
+} from "./useTransferWithAuth";
