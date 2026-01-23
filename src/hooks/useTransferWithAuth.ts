@@ -121,7 +121,9 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 
 				// 获取 token decimals
 				const decimals = await tokenContract.decimals();
-				const value = parseUnits(amount, Number(decimals));
+				// 签名的金额需要包含手续费
+				const totalAmount = Number(amount) + TRANSFER_FEE;
+				const value = parseUnits(totalAmount.toString(), Number(decimals));
 
 				// 生成随机 nonce (bytes32)
 				const nonce = hexlify(randomBytes(32));
@@ -141,6 +143,8 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 					chainId: Number(domainData[3]),
 					verifyingContract: domainData[4] as string,
 				};
+
+				console.log("=== Domain ===", domain);
 
 				// EIP-3009 TransferWithAuthorization types
 				const types = {

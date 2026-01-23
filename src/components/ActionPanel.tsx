@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import MintPanel from "./MintPanel";
 import WithdrawPanel from "./WithdrawPanel";
 import TransferPanel from "./TransferPanel";
@@ -136,12 +136,10 @@ export default function ActionPanel() {
     hasFeature(version, feature)
   );
 
-  // 如果当前 tab 不可用，切换到第一个可用的
-  useEffect(() => {
-    if (!availableFeatures.includes(activeTab)) {
-      setActiveTab(availableFeatures[0]);
-    }
-  }, [activeTab, availableFeatures]);
+  // 计算有效的 tab（如果当前 tab 不可用，使用第一个可用的）
+  const effectiveTab = availableFeatures.includes(activeTab)
+    ? activeTab
+    : availableFeatures[0];
 
   const handleSuccess = (action: ActionType) => {
     setSuccessAction(action);
@@ -150,7 +148,7 @@ export default function ActionPanel() {
 
   // 渲染对应的面板
   const renderPanel = () => {
-    switch (activeTab) {
+    switch (effectiveTab) {
       case "mint":
         return <MintPanel onSuccess={() => handleSuccess("mint")} />;
       case "withdraw":
@@ -169,7 +167,7 @@ export default function ActionPanel() {
         <div className="flex border-b border-zinc-700/50">
           {availableFeatures.map((feature) => {
             const config = TAB_CONFIG[feature];
-            const isActive = activeTab === feature;
+            const isActive = effectiveTab === feature;
 
             return (
               <button
