@@ -19,12 +19,8 @@ export interface TransferAuthPayload {
 	validBefore: number;
 	/** 唯一 nonce (bytes32) */
 	nonce: string;
-	/** 签名 v */
-	v: number;
-	/** 签名 r */
-	r: string;
-	/** 签名 s */
-	s: string;
+	/** 完整签名 */
+	signature: string;
 }
 
 export interface UseTransferWithAuthReturn {
@@ -130,7 +126,7 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 
 				// 设置时间窗口 (validAfter: 现在, validBefore: 5分钟后)
 				const now = Math.floor(Date.now() / 1000);
-				const validAfter = now;
+				const validAfter = now - 12; // 提前 10 秒，避免时间同步问题
 				const validBefore = now + 900; // 5 分钟有效期
 
 				// 获取 EIP-712 domain 信息
@@ -143,8 +139,6 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 					chainId: Number(domainData[3]),
 					verifyingContract: domainData[4] as string,
 				};
-
-				console.log("=== Domain ===", domain);
 
 				// EIP-3009 TransferWithAuthorization types
 				const types = {
@@ -167,19 +161,9 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 					nonce,
 				};
 
-				console.log("=== EIP-712 Domain ===");
-				console.log(JSON.stringify(domain, null, 2));
-				console.log("=== Message ===");
-				console.log(JSON.stringify(message, null, 2));
-
 				// 使用 EIP-712 签名
 				const signature = await signer.signTypedData(domain, types, message);
-				console.log("=== Raw Signature ===");
-				console.log(signature);
-
-				// 解析签名
-				const sig = Signature.from(signature);
-
+				// const sig = Signature.from(signature);
 				const result: TransferAuthPayload = {
 					from: address,
 					to,
@@ -187,15 +171,10 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 					validAfter,
 					validBefore,
 					nonce,
-					v: sig.v,
-					r: sig.r,
-					s: sig.s,
+					signature,
 				};
 
 				setPayload(result);
-
-				console.log("=== TransferWithAuthorization Payload ===");
-				console.log(JSON.stringify(result, null, 2));
 
 				return result;
 			} catch (err) {

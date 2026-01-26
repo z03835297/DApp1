@@ -40,3 +40,12 @@ export {
 	type TransferAuthPayload,
 	type UseTransferWithAuthReturn,
 } from "./useTransferWithAuth";
+
+// 转账流程 (签名 -> 验证 -> 结算)
+export {
+	useTransferFlow,
+	type TransferStep,
+	type TransferResult,
+	type TransferParams,
+	type UseTransferFlowReturn,
+} from "./useTransferFlow";
