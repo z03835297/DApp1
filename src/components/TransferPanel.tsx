@@ -244,7 +244,7 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 						</svg>
 						{step === "signing" && "签名中..."}
 						{step === "verifying" && "验证中..."}
-						{step === "settling" && "结算中..."}
+						{step === "settling" && "转账中..."}
 					</span>
 				) : (
 					<span>签名转账 {tokenInfo.symbol}</span>
