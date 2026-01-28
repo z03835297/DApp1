@@ -105,19 +105,12 @@ export function useTransferFlow(): UseTransferFlowReturn {
 					return false;
 				}
 
-				// 构建 API 请求参数
+				// 构建 API 请求参数（signResult 已包含 domain 和 message）
 				const paymentRequest: PaymentRequest = {
-					from: signResult.from,
-					to: signResult.to,
-					value: signResult.value,
-					validAfter: signResult.validAfter,
-					validBefore: signResult.validBefore,
-					nonce: signResult.nonce,
-					signature: signResult.signature,
+					domain: signResult.domain,
+					message: signResult.message,
 				};
 
-				console.log("=== Payment Request ===");
-				console.log(JSON.stringify(paymentRequest, null, 2));
 
 				// Step 2: 验证
 				setStep("verifying");

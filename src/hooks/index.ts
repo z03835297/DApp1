@@ -37,6 +37,8 @@ export { useTransfer, type UseTransferReturn } from "./useTransfer";
 // TransferWithAuthorization 相关 (EIP-3009)
 export {
 	useTransferWithAuth,
+	type TransferAuthDomain,
+	type TransferAuthMessage,
 	type TransferAuthPayload,
 	type UseTransferWithAuthReturn,
 } from "./useTransferWithAuth";

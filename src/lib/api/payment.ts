@@ -5,8 +5,16 @@
 /** API 基础 URL */
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
-/** 支付请求参数 */
-export interface PaymentRequest {
+/** EIP-712 Domain 参数 */
+export interface PaymentDomain {
+	chainId: number;
+	name: string;
+	verifyingContract: string;
+	version: string;
+}
+
+/** 支付消息参数 */
+export interface PaymentMessage {
 	from: string;
 	to: string;
 	value: string;
@@ -14,6 +22,12 @@ export interface PaymentRequest {
 	validBefore: number;
 	nonce: string;
 	signature: string;
+}
+
+/** 支付请求参数 */
+export interface PaymentRequest {
+	domain: PaymentDomain;
+	message: PaymentMessage;
 }
 
 /** 支付验证响应 */

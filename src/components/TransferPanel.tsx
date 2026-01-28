@@ -328,18 +328,18 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 					<div className="text-xs text-zinc-400 space-y-1">
 						<p>
 							<span className="text-zinc-500">From:</span>{" "}
-							{payload.from.slice(0, 10)}...{payload.from.slice(-8)}
+							{payload.message.from.slice(0, 10)}...{payload.message.from.slice(-8)}
 						</p>
 						<p>
 							<span className="text-zinc-500">To:</span>{" "}
-							{payload.to.slice(0, 10)}...{payload.to.slice(-8)}
+							{payload.message.to.slice(0, 10)}...{payload.message.to.slice(-8)}
 						</p>
 						<p>
-							<span className="text-zinc-500">Value:</span> {payload.value}
+							<span className="text-zinc-500">Value:</span> {payload.message.value}
 						</p>
 						<p>
 							<span className="text-zinc-500">Nonce:</span>{" "}
-							{payload.nonce.slice(0, 18)}...
+							{payload.message.nonce.slice(0, 18)}...
 						</p>
 					</div>
 				</div>

@@ -6,7 +6,20 @@ import { useWalletInfo } from "./useWalletInfo";
 import { useTokenContract } from "./useContract";
 import { TRANSFER_FEE } from "@/lib/constants";
 
-export interface TransferAuthPayload {
+/** EIP-712 Domain 信息 */
+export interface TransferAuthDomain {
+	/** 链 ID */
+	chainId: number;
+	/** 合约名称 */
+	name: string;
+	/** 验证合约地址 */
+	verifyingContract: string;
+	/** 版本号 */
+	version: string;
+}
+
+/** 转账消息 */
+export interface TransferAuthMessage {
 	/** 发送者地址 */
 	from: string;
 	/** 接收者地址 */
@@ -21,6 +34,13 @@ export interface TransferAuthPayload {
 	nonce: string;
 	/** 完整签名 */
 	signature: string;
+}
+
+export interface TransferAuthPayload {
+	/** EIP-712 Domain */
+	domain: TransferAuthDomain;
+	/** 转账消息 */
+	message: TransferAuthMessage;
 }
 
 export interface UseTransferWithAuthReturn {
@@ -165,13 +185,21 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 				const signature = await signer.signTypedData(domain, types, message);
 				// const sig = Signature.from(signature);
 				const result: TransferAuthPayload = {
-					from: address,
-					to,
-					value: value.toString(),
-					validAfter,
-					validBefore,
-					nonce,
-					signature,
+					domain: {
+						chainId: domain.chainId,
+						name: domain.name,
+						verifyingContract: domain.verifyingContract,
+						version: domain.version,
+					},
+					message: {
+						from: address,
+						to,
+						value: value.toString(),
+						validAfter,
+						validBefore,
+						nonce,
+						signature,
+					},
 				};
 
 				setPayload(result);
