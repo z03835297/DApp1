@@ -1,9 +1,15 @@
-"use client";
+import { redirect } from "next/navigation";
+import { isVersionEnabled } from "@/lib/router";
 import Navbar from "@/components/Navbar";
 import ActionPanel from "@/components/ActionPanel";
 import { VersionProvider } from "@/context";
 
 export default function V1Page() {
+  // 如果 V1 版本被禁用，重定向到 V2
+  if (!isVersionEnabled("v1")) {
+    redirect("/v2");
+  }
+
   return (
     <VersionProvider version="v1">
       <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950">

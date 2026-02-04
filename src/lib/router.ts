@@ -17,6 +17,8 @@ export const routerConfig = {
 			path: "/v1",
 			description: "稳定版本",
 			isStable: true,
+			// 是否启用此版本
+			enabled: false,
 			// V1 支持的功能
 			features: ["mint", "withdraw"] as Feature[],
 		},
@@ -25,6 +27,8 @@ export const routerConfig = {
 			path: "/v2",
 			description: "免 Gas 转账",
 			isStable: false,
+			// 是否启用此版本
+			enabled: true,
 			// V2 支持的功能（多了 transfer）
 			features: ["mint", "withdraw", "transfer"] as Feature[],
 		},
@@ -62,4 +66,9 @@ export function hasFeature(version: AppVersion, feature: Feature): boolean {
 // 获取版本支持的所有功能
 export function getFeatures(version: AppVersion): readonly Feature[] {
 	return routerConfig.versions[version].features;
+}
+
+// 检查版本是否启用
+export function isVersionEnabled(version: AppVersion): boolean {
+	return routerConfig.versions[version].enabled;
 }
