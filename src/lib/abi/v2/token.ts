@@ -16,6 +16,12 @@ export const TOKEN_ABI = [
 		name: "AccessControlUnauthorizedAccount",
 		type: "error",
 	},
+	{ inputs: [], name: "ArrayLengthMismatch", type: "error" },
+	{
+		inputs: [{ internalType: "uint256", name: "length", type: "uint256" }],
+		name: "ArrayTooLarge",
+		type: "error",
+	},
 	{ inputs: [], name: "AuthorizationAlreadyUsed", type: "error" },
 	{ inputs: [], name: "AuthorizationCanceledErr", type: "error" },
 	{ inputs: [], name: "AuthorizationExpired", type: "error" },
@@ -96,6 +102,12 @@ export const TOKEN_ABI = [
 	{
 		inputs: [{ internalType: "address", name: "admin", type: "address" }],
 		name: "InvalidAdmin",
+		type: "error",
+	},
+	{ inputs: [], name: "InvalidBatchLength", type: "error" },
+	{
+		inputs: [{ internalType: "address", name: "target", type: "address" }],
+		name: "InvalidMintTarget",
 		type: "error",
 	},
 	{ inputs: [], name: "InvalidShortString", type: "error" },
@@ -379,6 +391,40 @@ export const TOKEN_ABI = [
 		name: "balanceOf",
 		outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
 		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{ internalType: "address[]", name: "tos", type: "address[]" },
+			{ internalType: "uint256[]", name: "amounts", type: "uint256[]" },
+		],
+		name: "batchTransfer",
+		outputs: [],
+		stateMutability: "nonpayable",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				components: [
+					{ internalType: "address", name: "from", type: "address" },
+					{ internalType: "address", name: "to", type: "address" },
+					{ internalType: "uint256", name: "value", type: "uint256" },
+					{ internalType: "uint256", name: "validAfter", type: "uint256" },
+					{ internalType: "uint256", name: "validBefore", type: "uint256" },
+					{ internalType: "bytes32", name: "nonce", type: "bytes32" },
+					{ internalType: "uint8", name: "v", type: "uint8" },
+					{ internalType: "bytes32", name: "r", type: "bytes32" },
+					{ internalType: "bytes32", name: "s", type: "bytes32" },
+				],
+				internalType: "struct Token.TransferAuthorization[]",
+				name: "items",
+				type: "tuple[]",
+			},
+		],
+		name: "batchTransferWithAuthorization",
+		outputs: [],
+		stateMutability: "nonpayable",
 		type: "function",
 	},
 	{

@@ -31,9 +31,9 @@ export const CONTRACT_ADDRESS: Record<ChainId, VersionedContracts> = {
 			[ContractName.VAULT]: "0x7695b38d2A3308Cf45BFfdD8c297015F82708787", // V1 Sepolia 测试网 Vault 合约地址
 		},
 		v2: {
-			[ContractName.TOKEN]: "0x4beEAF4429e33ab4c751C370D19c0d7Bb0B36756", // V2 Sepolia 测试网代币合约地址
+			[ContractName.TOKEN]: "0x953dB88e180532d1964826a83E811c9951800ED2", // V2 Sepolia 测试网代币合约地址
 			[ContractName.USDT]: "0x4920E3E1E7c4D13c01188CfC7723873eef6639Bc", // V2 Sepolia 测试网 USDT 合约地址
-			[ContractName.VAULT]: "0x7dEf6BAfA3Af0b65f8fF42A52d8dB7d08e05a6fD", // V2 Sepolia 测试网 Vault 合约地址
+			[ContractName.VAULT]: "0x66Cabd39E0F701821DC41Bfa6f59641E99609be3", // V2 Sepolia 测试网 Vault 合约地址
 		},
 	},
 };
