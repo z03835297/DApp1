@@ -1,0 +1,17 @@
+# token1-dapp — production-style run
+#
+# Build:  docker compose build
+# Up:     docker compose up -d
+# Logs:   docker compose logs -f
+#
+# 本地有 contracts.json 时会打进镜像；没有则用 contracts.example.json（见 Dockerfile）。
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      NODE_ENV: production

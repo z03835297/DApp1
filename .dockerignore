@@ -1,0 +1,28 @@
+# dependencies & build artifacts
+node_modules
+.next
+out
+
+# git & editor
+.git
+.gitignore
+.history
+.cursor
+
+# env (inject at runtime if needed)
+.env
+.env.*
+
+# unrelated / large trees
+src/web
+**/dist
+coverage
+*.pem
+.DS_Store
+*.md
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+bun-debug.log*

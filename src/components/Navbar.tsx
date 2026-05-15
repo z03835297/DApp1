@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isVersionEnabled } from "@/lib/router";
+import ConnectButton from "@/components/ConnectButton";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -59,7 +60,7 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center">
-            <appkit-button />
+            <ConnectButton />
           </div>
         </div>
       </div>

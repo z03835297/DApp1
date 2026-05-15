@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
+import { useAccount, useChainId, useConnectorClient } from "wagmi";
+import type { Account, Chain, Client, Transport } from "viem";
 import {
-	useAppKitAccount,
-	useAppKitNetwork,
-	useAppKitProvider,
-} from "@reown/appkit/react";
-import { BrowserProvider, type Eip1193Provider } from "ethers";
+	BrowserProvider,
+	JsonRpcSigner,
+	type Eip1193Provider,
+} from "ethers";
 import { ChainId } from "@/lib/constants";
 
 export interface WalletInfo {
@@ -23,7 +24,23 @@ export interface WalletInfo {
 	/** 获取 BrowserProvider 实例 */
 	getProvider: () => BrowserProvider | null;
 	/** 获取 Signer 实例（用于签名交易） */
-	getSigner: () => Promise<import("ethers").JsonRpcSigner | null>;
+	getSigner: () => Promise<JsonRpcSigner | null>;
+}
+
+/**
+ * 把 viem 的 WalletClient 适配成 ethers v6 的 BrowserProvider
+ * @see https://wagmi.sh/react/guides/ethers#walletclient--signer
+ */
+function clientToBrowserProvider(
+	client: Client<Transport, Chain, Account>,
+): BrowserProvider {
+	const { chain, transport } = client;
+	const network = {
+		chainId: chain.id,
+		name: chain.name,
+		ensAddress: chain.contracts?.ensRegistry?.address,
+	};
+	return new BrowserProvider(transport as unknown as Eip1193Provider, network);
 }
 
 /**
@@ -31,42 +48,43 @@ export interface WalletInfo {
  * 封装钱包连接状态、网络信息和 Provider 获取逻辑
  */
 export function useWalletInfo(): WalletInfo {
-	const { address, isConnected } = useAppKitAccount();
-	const { chainId: rawChainId } = useAppKitNetwork();
-	const { walletProvider } = useAppKitProvider("eip155");
+	const { address, isConnected } = useAccount();
+	const wagmiChainId = useChainId();
+	const { data: client } = useConnectorClient();
 
-	// 转换 chainId 为数字
-	const chainId = rawChainId ? Number(rawChainId) : undefined;
+	const chainId = isConnected ? wagmiChainId : undefined;
 
-	// 检查是否为支持的链
 	const isSupportedChain = useMemo(
 		() => chainId === ChainId.MAINNET || chainId === ChainId.SEPOLIA,
 		[chainId],
 	);
 
-	// 获取 BrowserProvider 实例
+	const walletProvider = useMemo<Eip1193Provider | undefined>(() => {
+		if (!client) return undefined;
+		return client.transport as unknown as Eip1193Provider;
+	}, [client]);
+
 	const getProvider = useMemo(() => {
 		return () => {
-			if (!walletProvider) return null;
-			return new BrowserProvider(walletProvider as Eip1193Provider);
+			if (!client) return null;
+			return clientToBrowserProvider(client);
 		};
-	}, [walletProvider]);
+	}, [client]);
 
-	// 获取 Signer 实例
 	const getSigner = useMemo(() => {
 		return async () => {
-			const provider = getProvider();
-			if (!provider) return null;
-			return await provider.getSigner();
+			if (!client) return null;
+			const provider = clientToBrowserProvider(client);
+			return new JsonRpcSigner(provider, client.account.address);
 		};
-	}, [getProvider]);
+	}, [client]);
 
 	return {
 		address,
 		isConnected,
 		chainId,
 		isSupportedChain,
-		walletProvider: walletProvider as Eip1193Provider | undefined,
+		walletProvider,
 		getProvider,
 		getSigner,
 	};

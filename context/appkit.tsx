@@ -1,37 +1,44 @@
 "use client";
 
-import { createAppKit } from "@reown/appkit/react";
-import { EthersAdapter } from "@reown/appkit-adapter-ethers";
-import { mainnet, sepolia } from "@reown/appkit/networks";
-import type { ReactNode } from "react";
+import { RainbowKitProvider, lightTheme } from "@rainbow-me/rainbowkit";
+import "@rainbow-me/rainbowkit/styles.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState, type ReactNode } from "react";
+import { WagmiProvider } from "wagmi";
+import { mainnet, wagmiConfig } from "@/lib/wagmi";
 
-// 1. Get projectId at https://dashboard.reown.com
-const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || "";
-
-// 2. Create a metadata object
-const metadata = {
-  name: "WDB DApp",
-  description: "WDB DApp",
-  url: typeof window !== "undefined" ? window.location.origin : "https://localhost:3000",
-  icons: ["/favicon.ico"],
-};
-
-// 3. 创建 EthersAdapter
-const ethersAdapter = new EthersAdapter();
-
-// 4. Create the AppKit instance
-createAppKit({
-  adapters: [ethersAdapter],
-  metadata,
-  networks: [mainnet, sepolia],
-  defaultNetwork: mainnet,
-  projectId,
-  features: {
-    analytics: true,
-  },
-});
-
-// 5. Export the provider component
+/**
+ * 钱包接入 Provider
+ *
+ * 基于 wagmi + RainbowKit，仅启用浏览器注入式钱包（injectedWallet），
+ * 因此无需 WalletConnect Project ID。支持 Mainnet 与 Sepolia 两个网络，
+ * 用户可以通过 RainbowKit 的切链入口在主网与测试网之间切换。
+ */
 export function AppKitProvider({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+	const [queryClient] = useState(
+		() =>
+			new QueryClient({
+				defaultOptions: {
+					queries: {
+						staleTime: 30_000,
+						retry: 1,
+						refetchOnWindowFocus: false,
+					},
+				},
+			}),
+	);
+
+	return (
+		<WagmiProvider config={wagmiConfig}>
+			<QueryClientProvider client={queryClient}>
+				<RainbowKitProvider
+					theme={lightTheme()}
+					locale="zh-CN"
+					initialChain={mainnet}
+				>
+					{children}
+				</RainbowKitProvider>
+			</QueryClientProvider>
+		</WagmiProvider>
+	);
 }

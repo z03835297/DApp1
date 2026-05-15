@@ -36,6 +36,9 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# 私有合约地址配置（模板见 contracts.example.json）
+/contracts.json
+
 # vercel
 .vercel
 

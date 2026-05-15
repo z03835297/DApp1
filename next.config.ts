@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+	output: "standalone",
+
 	// Externalize pino and thread-stream to avoid bundling Node.js native modules
 	serverExternalPackages: ["pino", "pino-pretty", "thread-stream"],
 
