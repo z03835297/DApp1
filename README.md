@@ -74,7 +74,7 @@ bun run start
 ## Docker 部署
 
 - **Dockerfile**：多阶段构建（Bun 安装与构建 → Node 运行 standalone）
-- **docker-compose.yml**：将容器 **8080** 映射到主机；默认使用根目录 **`.env.local`**（与本地 Next 一致）
+- **docker-compose.yml**：将容器 **8080** 映射到主机；默认使用根目录 **`.env.local`**（与本地 Next 一致）；为兼容 **Proxmox LXC** 等嵌套环境默认开启 **`privileged: true`**（标准 KVM/裸机若介意隔离可改为 `false` 或删掉）。更稳妥的是在 PVE 上为 CT 开启 **nesting**，再视情况关闭 `privileged`。
 
 推荐一键脚本（会自动用 `.env.local`，没有则从 `.env.local.example` 生成）：
 

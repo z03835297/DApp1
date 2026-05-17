@@ -9,6 +9,9 @@
 # 容器内运行时变量由 env_file 注入（COMPOSE_ENV_FILE 默认为 .env.local，脚本会导出）。
 #
 # 本地有 contracts.json 时会打进镜像；没有则用 contracts.example.json（见 Dockerfile）。
+#
+# Proxmox LXC 等嵌套环境若启动失败（如 ip_unprivileged_port_start permission denied），保留下方
+# privileged；在普通 KVM/裸机上为更安全可改为 false 或删掉该行。
 
 services:
   app:
@@ -23,3 +26,5 @@ services:
       - "8080:8080"
     environment:
       NODE_ENV: production
+    # 嵌套 Docker（LXC）常需要；标准 VPS 可改为 false
+    privileged: true
