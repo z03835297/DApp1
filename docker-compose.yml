@@ -1,8 +1,12 @@
 # token1-dapp — production-style run
 #
-# Build:  docker compose build
-# Up:     docker compose up -d
-# Logs:   docker compose logs -f
+# 推荐：./scripts/run-docker.sh（使用 .env.local；缺省时从 .env.local.example 生成）
+#
+# 手动：docker compose --env-file .env.local build && docker compose --env-file .env.local up -d
+# Logs: docker compose --env-file .env.local logs -f
+#
+# 构建参数里的 ${NEXT_PUBLIC_* } 来自 compose 变量（通过 --env-file .env.local）。
+# 容器内运行时变量由 env_file 注入（COMPOSE_ENV_FILE 默认为 .env.local，脚本会导出）。
 #
 # 本地有 contracts.json 时会打进镜像；没有则用 contracts.example.json（见 Dockerfile）。
 
@@ -11,6 +15,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+    env_file:
+      - ${COMPOSE_ENV_FILE:-.env.local}
     ports:
       - "8080:8080"
     environment:

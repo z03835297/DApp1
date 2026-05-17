@@ -8,7 +8,11 @@
 		"start": "next start -p 8080",
 		"lint": "eslint",
 		"docker:build": "sh scripts/docker-build.sh",
-		"docker:run": "sh scripts/docker-run.sh"
+		"docker:run": "sh scripts/docker-run.sh",
+		"docker:up": "sh scripts/run-docker.sh",
+		"docker:down": "sh scripts/run-docker.sh down",
+		"docker:logs": "sh scripts/run-docker.sh logs",
+		"docker:refresh": "sh scripts/run-docker.sh refresh"
 	},
 	"dependencies": {
 		"@rainbow-me/rainbowkit": "^2",

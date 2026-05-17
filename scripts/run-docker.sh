@@ -1,0 +1,112 @@
+#!/usr/bin/env sh
+# 一键：准备 env 文件 → docker compose 构建并启动（默认）
+#
+# 默认使用项目根目录的 .env.local（与 Next 本地开发一致）。
+# 若未设置 ENV_FILE 且缺少 .env.local，则从 .env.local.example 复制一份。
+#
+# 用法:
+#   ./scripts/run-docker.sh           # 确保 env 文件存在，build + up -d
+#   ./scripts/run-docker.sh build     # 仅构建
+#   ./scripts/run-docker.sh up        # 构建并后台启动（同上）
+#   ./scripts/run-docker.sh down      # 停止并移除容器
+#   ./scripts/run-docker.sh logs      # 跟踪日志
+#   ./scripts/run-docker.sh rebuild   # 无缓存构建并启动
+#   ./scripts/run-docker.sh refresh   # 改 .env.local 后：重建镜像 + 强制换新容器
+#
+# 显式指定 env 文件：
+#   ENV_FILE=.env.production ./scripts/run-docker.sh
+
+set -eu
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+EXAMPLE_ENV=".env.local.example"
+CMD="${1:-up}"
+
+# 未设置 ENV_FILE 时固定使用 .env.local（可自行 ENV_FILE=.env 覆盖）
+if [ -z "${ENV_FILE:-}" ]; then
+	ENV_FILE=".env.local"
+fi
+
+export COMPOSE_ENV_FILE="$ENV_FILE"
+
+ensure_env() {
+	if [ ! -f "$ENV_FILE" ]; then
+		if [ ! -f "$EXAMPLE_ENV" ]; then
+			echo "错误：缺少 $ENV_FILE，且不存在模板 $EXAMPLE_ENV。" >&2
+			exit 1
+		fi
+		cp "$EXAMPLE_ENV" "$ENV_FILE"
+		echo "已创建 $ENV_FILE（从 $EXAMPLE_ENV 复制）。请按需编辑 API 地址等变量。"
+	fi
+}
+
+compose() {
+	docker compose --env-file "$ENV_FILE" "$@"
+}
+
+compose_maybe() {
+	if [ -f "$ENV_FILE" ]; then
+		docker compose --env-file "$ENV_FILE" "$@"
+	else
+		unset COMPOSE_ENV_FILE || true
+		docker compose "$@"
+	fi
+}
+
+case "$CMD" in
+	build)
+		ensure_env
+		compose build
+		;;
+	up)
+		ensure_env
+		compose build
+		compose up -d
+		echo "应用: http://localhost:8080"
+		echo "查看日志: ./scripts/run-docker.sh logs"
+		;;
+	down)
+		compose_maybe down
+		;;
+	logs)
+		compose_maybe logs -f
+		;;
+	rebuild)
+		ensure_env
+		compose build --no-cache
+		compose up -d
+		echo "应用: http://localhost:8080"
+		;;
+	refresh)
+		ensure_env
+		echo "按当前 $ENV_FILE 重新构建镜像并重建容器 …"
+		compose build
+		compose up -d --force-recreate
+		echo "应用: http://localhost:8080"
+		echo "若 NEXT_PUBLIC_* 仍异常，请尝试: $0 rebuild（无缓存构建）"
+		;;
+	-h | --help | help)
+		cat <<'EOF'
+用法:
+  ./scripts/run-docker.sh           确保 env 文件存在，build + up -d
+  ./scripts/run-docker.sh build     仅构建
+  ./scripts/run-docker.sh up        同上（默认）
+  ./scripts/run-docker.sh down      停止并移除容器
+  ./scripts/run-docker.sh logs      跟踪日志
+  ./scripts/run-docker.sh rebuild   无缓存构建并启动
+  ./scripts/run-docker.sh refresh   修改 .env.local 后推荐：重建 + 强制换新容器
+
+默认读取项目根目录的 .env.local；也可用 ENV_FILE 指定其它路径。
+若不存在 .env.local，会从 .env.local.example 自动生成一份。
+
+注意：NEXT_PUBLIC_* 在构建阶段写入前端 bundle；改完后至少执行 refresh，缓存异常时用 rebuild。
+不要将 .env COPY 进 Dockerfile（会留在镜像层里）；本仓库通过 compose 的 env_file 在运行时注入。
+EOF
+		;;
+	*)
+		echo "未知命令: $CMD。运行: $0 --help" >&2
+		exit 1
+		;;
+esac

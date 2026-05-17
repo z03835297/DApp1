@@ -65,17 +65,29 @@ bun run start
 | `bun run build` | 生产构建（含 `output: "standalone"`） |
 | `bun run start` | 启动生产服务 |
 | `bun run lint` | ESLint |
-| `bun run docker:build` | 构建 Docker 镜像（见 `scripts/docker-build.sh`） |
-| `bun run docker:run` | 运行镜像（见 `scripts/docker-run.sh`） |
+| `bun run docker:up` | `run-docker.sh`：按 `.env.local` 构建并启动 Compose |
+| `bun run docker:down` | Compose 停止 |
+| `bun run docker:logs` | Compose 日志 |
+| `bun run docker:build` | 仅构建镜像（`scripts/docker-build.sh`） |
+| `bun run docker:run` | 直接 `docker run` 镜像（`scripts/docker-run.sh`） |
 
 ## Docker 部署
 
 - **Dockerfile**：多阶段构建（Bun 安装与构建 → Node 运行 standalone）
-- **docker-compose.yml**：将容器 **8080** 映射到主机
+- **docker-compose.yml**：将容器 **8080** 映射到主机；默认使用根目录 **`.env.local`**（与本地 Next 一致）
+
+推荐一键脚本（会自动用 `.env.local`，没有则从 `.env.local.example` 生成）：
 
 ```bash
-docker compose build
-docker compose up -d
+./scripts/run-docker.sh
+# 或：bun run docker:up
+```
+
+手动：
+
+```bash
+docker compose --env-file .env.local build
+docker compose --env-file .env.local up -d
 ```
 
 镜像构建时若缺少 `contracts.json`，会自动使用 `contracts.example.json` 占位；**生产环境建议在构建上下文中提供真实的 `contracts.json`**，或使用 CI 在构建前生成该文件。
@@ -92,7 +104,8 @@ docker compose up -d
 ├── Dockerfile
 ├── scripts/
 │   ├── docker-build.sh
-│   └── docker-run.sh
+│   ├── docker-run.sh
+│   └── run-docker.sh      # 推荐使用：.env.local + compose 构建/启动
 ├── src/
 │   ├── app/              # Next.js App Router 页面
 │   ├── components/       # UI（含 ConnectButton 等）

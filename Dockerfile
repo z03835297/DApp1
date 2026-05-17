@@ -18,6 +18,11 @@ COPY . .
 RUN test -f contracts.json || cp contracts.example.json contracts.json
 
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# 客户端 bundle 在 build 时固化 NEXT_PUBLIC_*（见 .env.local.example）
+ARG NEXT_PUBLIC_API_URL=http://localhost:3000
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 RUN bun run build
 
 # --- run ----------------------------------------------------------------
