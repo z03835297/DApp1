@@ -8,6 +8,7 @@ import {
 	settlePayment,
 	type PaymentRequest,
 } from "@/lib/api";
+import { resolveTransactionHashFromResult } from "@/lib/explorer";
 
 /** 转账流程状态 */
 export type TransferStep = "idle" | "signing" | "verifying" | "settling" | "success" | "error";
@@ -15,6 +16,8 @@ export type TransferStep = "idle" | "signing" | "verifying" | "settling" | "succ
 /** 转账结果 */
 export interface TransferResult {
 	txHash?: string;
+	/** 来自 EIP-712 domain，用于打开正确的区块浏览器 */
+	chainId?: number;
 	[key: string]: unknown;
 }
 
@@ -138,8 +141,32 @@ export function useTransferFlow(): UseTransferFlowReturn {
 				console.log("=== Settle Result ===");
 				console.log(JSON.stringify(settleResult, null, 2));
 
-				// 成功
-				setTxResult(settleResult.data || {});
+				// 成功：展平嵌套 data，统一 txHash / txid，并带上 chainId 供浏览器链接
+				const raw =
+					settleResult.data &&
+					typeof settleResult.data === "object" &&
+					!Array.isArray(settleResult.data)
+						? (settleResult.data as Record<string, unknown>)
+						: {};
+				const inner =
+					raw.data &&
+					typeof raw.data === "object" &&
+					!Array.isArray(raw.data)
+						? (raw.data as Record<string, unknown>)
+						: {};
+				const flat: Record<string, unknown> = { ...raw, ...inner };
+				const resolvedHash = resolveTransactionHashFromResult(raw);
+				const parsedChain = Number(flat.chainId ?? raw.chainId);
+				const resultChainId =
+					Number.isFinite(parsedChain) && parsedChain > 0
+						? parsedChain
+						: paymentRequest.domain.chainId;
+
+				setTxResult({
+					...flat,
+					...(resolvedHash ? { txHash: resolvedHash } : {}),
+					chainId: resultChainId,
+				});
 				setStep("success");
 				await refreshBalance();
 

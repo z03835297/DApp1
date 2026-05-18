@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useChainId } from "wagmi";
 import {
 	useWalletInfo,
 	useTokenInfo,
@@ -8,6 +9,7 @@ import {
 	useTransferFlow,
 } from "@/hooks";
 import { TRANSFER_FEE } from "@/lib/constants";
+import { getTransactionExplorerUrl, getDisplayTxHash } from "@/lib/explorer";
 
 interface TransferPanelProps {
 	onSuccess?: () => void;
@@ -36,6 +38,8 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 		resetState,
 		clearError,
 	} = useTransferFlow();
+
+	const walletChainId = useChainId();
 
 	// 处理接收地址变化
 	const handleRecipientChange = (value: string) => {
@@ -67,6 +71,17 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 			console.error("Failed to copy:", err);
 		}
 	};
+
+	const displayTxHash = txResult ? getDisplayTxHash(txResult) : null;
+	const explorerChainId =
+		typeof txResult?.chainId === "number" && txResult.chainId > 0
+			? txResult.chainId
+			: walletChainId;
+
+	const successTxExplorerUrl =
+		step === "success" && displayTxHash
+			? getTransactionExplorerUrl(explorerChainId, displayTxHash)
+			: null;
 
 	// 处理转账
 	const handleTransfer = async () => {
@@ -266,20 +281,36 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 							关闭
 						</button>
 					</div>
-					{txResult.txHash && (
+					{displayTxHash && (
 						<div className="text-xs text-zinc-400">
-							<div className="flex items-center gap-2">
+							<div className="flex items-center gap-2 flex-wrap">
 								<span className="text-zinc-500">交易哈希:</span>
+								{successTxExplorerUrl ? (
+									<a
+										href={successTxExplorerUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="font-mono text-zinc-300 hover:text-indigo-400 underline-offset-2 hover:underline transition-colors"
+										title="在区块浏览器中查看交易"
+									>
+										{displayTxHash.slice(0, 10)}...
+										{displayTxHash.slice(-8)}
+									</a>
+								) : (
+									<span className="font-mono text-zinc-300">
+										{displayTxHash.slice(0, 10)}...
+										{displayTxHash.slice(-8)}
+									</span>
+								)}
 								<button
 									type="button"
-									onClick={() => handleCopyHash(txResult.txHash as string)}
-									className="font-mono hover:text-white transition-colors cursor-pointer flex items-center gap-1 group"
-									title="点击复制"
+									onClick={() => handleCopyHash(displayTxHash)}
+									className="inline-flex items-center gap-1 text-zinc-400 hover:text-white transition-colors"
+									title="复制完整哈希"
 								>
-									{txResult.txHash.slice(0, 10)}...{txResult.txHash.slice(-8)}
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
-										className="h-3.5 w-3.5 opacity-50 group-hover:opacity-100 transition-opacity"
+										className="h-3.5 w-3.5"
 										fill="none"
 										viewBox="0 0 24 24"
 										stroke="currentColor"
