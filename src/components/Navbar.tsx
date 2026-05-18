@@ -22,7 +22,7 @@ export default function Navbar() {
           {/* Logo and Version Navigation */}
           <div className="flex items-center gap-6">
             <Link href="/" className="text-xl font-bold text-white">
-              WDB DApp
+             BaCi DApp
             </Link>
 
             {/* Version Navigation */}

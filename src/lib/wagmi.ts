@@ -12,7 +12,7 @@ import { custom } from "viem";
  */
 const connectors = connectorsForWallets(
 	[{ groupName: "Wallets", wallets: [injectedWallet] }],
-	{ appName: "WDB DApp", projectId: "none" },
+	{ appName: "BaCi DApp", projectId: "none" },
 );
 
 /**
