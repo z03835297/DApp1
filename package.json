@@ -12,7 +12,8 @@
 		"docker:up": "sh scripts/run-docker.sh",
 		"docker:down": "sh scripts/run-docker.sh down",
 		"docker:logs": "sh scripts/run-docker.sh logs",
-		"docker:refresh": "sh scripts/run-docker.sh refresh"
+		"docker:refresh": "sh scripts/run-docker.sh refresh",
+		"docker:contracts": "sh scripts/run-docker.sh contracts"
 	},
 	"dependencies": {
 		"@rainbow-me/rainbowkit": "^2",

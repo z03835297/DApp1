@@ -68,6 +68,8 @@ bun run start
 | `bun run docker:up` | `run-docker.sh`：按 `.env.local` 构建并启动 Compose |
 | `bun run docker:down` | Compose 停止 |
 | `bun run docker:logs` | Compose 日志 |
+| `bun run docker:refresh` | 改 `.env.local` 或 `contracts.json` 后重建并重启容器 |
+| `bun run docker:contracts` | 同上（语义别名） |
 | `bun run docker:build` | 仅构建镜像（`scripts/docker-build.sh`） |
 | `bun run docker:run` | 直接 `docker run` 镜像（`scripts/docker-run.sh`） |
 
@@ -90,7 +92,7 @@ docker compose --env-file .env.local build
 docker compose --env-file .env.local up -d
 ```
 
-Docker 构建**要求**宿主机项目根目录已有真实的 **`contracts.json`**（可先 `cp contracts.example.json contracts.json` 再编辑）；否则会构建失败，避免误用示例地址。
+Docker 构建**要求**宿主机项目根目录已有真实的 **`contracts.json`**（可先 `cp contracts.example.json contracts.json` 再编辑）；否则会构建失败，避免误用示例地址。**修改 `contracts.json` 后**须重新构建镜像（地址打在 bundle 里）：`./scripts/run-docker.sh refresh`、`./scripts/run-docker.sh contracts` 或 `bun run docker:refresh`；若线上仍像旧地址，再用 `./scripts/run-docker.sh rebuild`。
 
 更多说明见 `Dockerfile` 与 `docker-compose.yml` 内注释。
 

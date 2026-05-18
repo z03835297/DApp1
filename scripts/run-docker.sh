@@ -12,7 +12,8 @@
 #   ./scripts/run-docker.sh down      # 停止并移除容器
 #   ./scripts/run-docker.sh logs      # 跟踪日志
 #   ./scripts/run-docker.sh rebuild   # 无缓存构建并启动
-#   ./scripts/run-docker.sh refresh   # 改 .env.local 后：重建镜像 + 强制换新容器
+#   ./scripts/run-docker.sh refresh   # 改 .env.local 或 contracts.json 后：重建镜像 + 强制换新容器
+#   ./scripts/run-docker.sh contracts # 同上（别名，便于改合约地址后执行）
 #
 # 显式指定 env 文件：
 #   ENV_FILE=.env.production ./scripts/run-docker.sh
@@ -92,14 +93,14 @@ case "$CMD" in
 		compose up -d
 		echo "应用: http://localhost:8080"
 		;;
-	refresh)
+	refresh|contracts)
 		ensure_env
 		ensure_contracts
-		echo "按当前 $ENV_FILE 重新构建镜像并重建容器 …"
+		echo "按当前 contracts.json 与 $ENV_FILE 重新构建镜像并重建容器 …"
 		compose build
 		compose up -d --force-recreate
 		echo "应用: http://localhost:8080"
-		echo "若 NEXT_PUBLIC_* 仍异常，请尝试: $0 rebuild（无缓存构建）"
+		echo "若 NEXT_PUBLIC_* 或合约地址仍异常，请尝试: $0 rebuild（无缓存构建）"
 		;;
 	-h | --help | help)
 		cat <<'EOF'
@@ -110,13 +111,14 @@ case "$CMD" in
   ./scripts/run-docker.sh down      停止并移除容器
   ./scripts/run-docker.sh logs      跟踪日志
   ./scripts/run-docker.sh rebuild   无缓存构建并启动
-  ./scripts/run-docker.sh refresh   修改 .env.local 后推荐：重建 + 强制换新容器
+  ./scripts/run-docker.sh refresh   修改 .env.local 或 contracts.json 后：重建 + 强制换新容器
+  ./scripts/run-docker.sh contracts 与 refresh 相同（改合约配置后常用）
 
 默认读取项目根目录的 .env.local；也可用 ENV_FILE 指定其它路径。
 若不存在 .env.local，会从 .env.local.example 自动生成一份。
 构建前须存在已配置的 contracts.json（模板：contracts.example.json）。
 
-注意：NEXT_PUBLIC_* 在构建阶段写入前端 bundle；改完后至少执行 refresh，缓存异常时用 rebuild。
+注意：NEXT_PUBLIC_* 与 contracts.json 均在构建阶段打进产物；修改后须 refresh/rebuild，勿仅重启容器。
 不要将 .env COPY 进 Dockerfile（会留在镜像层里）；本仓库通过 compose 的 env_file 在运行时注入。
 EOF
 		;;
