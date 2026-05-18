@@ -1,4 +1,19 @@
+import fs from "node:fs";
+import path from "node:path";
 import type { NextConfig } from "next";
+
+const cwd = process.cwd();
+const contractsPath = path.join(cwd, "contracts.json");
+/** standalone 镜像内仅有 server.js + .next/static，不包含 contracts.json（地址已在 build 时打进 bundle） */
+const isStandaloneRuntimeDir =
+	fs.existsSync(path.join(cwd, "server.js")) &&
+	fs.existsSync(path.join(cwd, ".next", "static"));
+
+if (!isStandaloneRuntimeDir && !fs.existsSync(contractsPath)) {
+	throw new Error(
+		"缺少 contracts.json：请复制 contracts.example.json 为 contracts.json 并填写合约地址后再运行 dev/build/start。",
+	);
+}
 
 const nextConfig: NextConfig = {
 	output: "standalone",

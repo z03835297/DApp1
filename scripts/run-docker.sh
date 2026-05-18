@@ -3,6 +3,7 @@
 #
 # 默认使用项目根目录的 .env.local（与 Next 本地开发一致）。
 # 若未设置 ENV_FILE 且缺少 .env.local，则从 .env.local.example 复制一份。
+# Docker 构建须已有 contracts.json（见 ensure_contracts）。
 #
 # 用法:
 #   ./scripts/run-docker.sh           # 确保 env 文件存在，build + up -d
@@ -31,6 +32,15 @@ fi
 
 export COMPOSE_ENV_FILE="$ENV_FILE"
 
+ensure_contracts() {
+	if [ ! -f "contracts.json" ]; then
+		echo "错误：缺少 contracts.json（链上合约地址）。Docker 构建需要该文件。" >&2
+		echo "  cp contracts.example.json contracts.json" >&2
+		echo "编辑 contracts.json 填写真实地址后再执行构建。" >&2
+		exit 1
+	fi
+}
+
 ensure_env() {
 	if [ ! -f "$ENV_FILE" ]; then
 		if [ ! -f "$EXAMPLE_ENV" ]; then
@@ -58,10 +68,12 @@ compose_maybe() {
 case "$CMD" in
 	build)
 		ensure_env
+		ensure_contracts
 		compose build
 		;;
 	up)
 		ensure_env
+		ensure_contracts
 		compose build
 		compose up -d
 		echo "应用: http://localhost:8080"
@@ -75,12 +87,14 @@ case "$CMD" in
 		;;
 	rebuild)
 		ensure_env
+		ensure_contracts
 		compose build --no-cache
 		compose up -d
 		echo "应用: http://localhost:8080"
 		;;
 	refresh)
 		ensure_env
+		ensure_contracts
 		echo "按当前 $ENV_FILE 重新构建镜像并重建容器 …"
 		compose build
 		compose up -d --force-recreate
@@ -100,6 +114,7 @@ case "$CMD" in
 
 默认读取项目根目录的 .env.local；也可用 ENV_FILE 指定其它路径。
 若不存在 .env.local，会从 .env.local.example 自动生成一份。
+构建前须存在已配置的 contracts.json（模板：contracts.example.json）。
 
 注意：NEXT_PUBLIC_* 在构建阶段写入前端 bundle；改完后至少执行 refresh，缓存异常时用 rebuild。
 不要将 .env COPY 进 Dockerfile（会留在镜像层里）；本仓库通过 compose 的 env_file 在运行时注入。

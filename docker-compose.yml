@@ -8,7 +8,7 @@
 # 构建参数里的 ${NEXT_PUBLIC_* } 来自 compose 变量（通过 --env-file .env.local）。
 # 容器内运行时变量由 env_file 注入（COMPOSE_ENV_FILE 默认为 .env.local，脚本会导出）。
 #
-# 本地有 contracts.json 时会打进镜像；没有则用 contracts.example.json（见 Dockerfile）。
+# 构建前宿主机须有 contracts.json（可由 contracts.example.json 复制后填写），否则会构建失败。
 #
 # Proxmox LXC 等嵌套环境若启动失败（如 ip_unprivileged_port_start permission denied），保留下方
 # privileged；在普通 KVM/裸机上为更安全可改为 false 或删掉该行。

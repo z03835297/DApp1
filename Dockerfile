@@ -14,8 +14,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# CI / fresh clone often has no contracts.json (gitignored) — fallback to template
-RUN test -f contracts.json || cp contracts.example.json contracts.json
+# 合约地址在 next build 时打进 bundle；缺少时必须先在宿主机配置（勿静默使用示例地址）
+RUN test -f contracts.json \
+	|| (echo >&2 "Docker build: missing contracts.json. On host: cp contracts.example.json contracts.json && edit, then rebuild." && exit 1)
 
 ENV NEXT_TELEMETRY_DISABLED=1
 

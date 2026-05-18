@@ -90,7 +90,7 @@ docker compose --env-file .env.local build
 docker compose --env-file .env.local up -d
 ```
 
-镜像构建时若缺少 `contracts.json`，会自动使用 `contracts.example.json` 占位；**生产环境建议在构建上下文中提供真实的 `contracts.json`**，或使用 CI 在构建前生成该文件。
+Docker 构建**要求**宿主机项目根目录已有真实的 **`contracts.json`**（可先 `cp contracts.example.json contracts.json` 再编辑）；否则会构建失败，避免误用示例地址。
 
 更多说明见 `Dockerfile` 与 `docker-compose.yml` 内注释。
 
