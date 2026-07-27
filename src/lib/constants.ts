@@ -1,6 +1,6 @@
-import type { VersionedContracts, AppVersion } from "./type";
-import { ContractName } from "./type";
-import { v1, v2, USDT_ABI, MUSDT_ABI, VAULT_ABI } from "./abi";
+import type { VersionedContracts, AppVersion, V3ContractAddressType } from "./type";
+import { ContractName, V3ContractName } from "./type";
+import { v1, v2, v3, USDT_ABI, MUSDT_ABI, VAULT_ABI } from "./abi";
 import contractsConfig from "../../contracts.json";
 
 /** V2 转账手续费（单位：token） */
@@ -61,4 +61,30 @@ export const ABI: Record<
 			[ContractName.VAULT]: VAULT_ABI,
 		},
 	},
+};
+
+// ============ V3（Token + LimitGate + RedeemQueue 三合约架构）============
+// v3 目前只部署在 Sepolia 测试网，合约集合与 v1/v2 不同，单独维护地址与 ABI 查表，
+// 不复用 CONTRACT_ADDRESS / ABI（避免为 v1/v2 引入不存在的字段）。
+
+/**
+ * V3 合约地址 - 按链区分（目前只有 Sepolia 有数据）
+ * 数据来源同样是 `contracts.json` 的 `v3` 字段。
+ */
+export const V3_CONTRACT_ADDRESS: Partial<Record<ChainId, V3ContractAddressType>> =
+	Object.fromEntries(
+		Object.entries(contractsConfig as Record<string, Record<string, unknown>>)
+			.filter(([, versions]) => versions.v3)
+			.map(([chainId, versions]) => [
+				Number(chainId),
+				versions.v3 as V3ContractAddressType,
+			]),
+	);
+
+/** V3 合约 ABI（USDT 复用 Sepolia 上的 mUSDT ABI，因为 v3 目前只部署在 Sepolia） */
+export const V3_ABI: Record<V3ContractName, object[]> = {
+	[V3ContractName.TOKEN]: v3.TOKEN_ABI,
+	[V3ContractName.LIMIT_GATE]: v3.LIMIT_GATE_ABI,
+	[V3ContractName.REDEEM_QUEUE]: v3.REDEEM_QUEUE_ABI,
+	[V3ContractName.USDT]: MUSDT_ABI,
 };

@@ -51,3 +51,59 @@ export {
 	type TransferParams,
 	type UseTransferFlowReturn,
 } from "./useTransferFlow";
+
+// ============ V3（Token + LimitGate + RedeemQueue）============
+export {
+	useV3Contract,
+	useV3TokenContract,
+	useV3LimitGateContract,
+	useV3RedeemQueueContract,
+	useV3UsdtContract,
+	type UseV3ContractReturn,
+} from "./useV3Contract";
+
+export {
+	useV3TokenMeta,
+	type TokenMeta,
+	type UseV3TokenMetaReturn,
+} from "./useV3TokenMeta";
+
+export {
+	useV3TokenBalance,
+	useV3UsdtBalance,
+	type UseV3BalanceReturn,
+} from "./useV3Balance";
+
+export { useV3Mint, type UseV3MintReturn } from "./useV3Mint";
+
+export { useV3Transfer, type UseV3TransferReturn } from "./useV3Transfer";
+
+export {
+	useV3LimitInfo,
+	type UseV3LimitInfoReturn,
+} from "./useV3LimitInfo";
+
+export {
+	useV3Redeem,
+	type RedeemOutcome,
+	type RedeemPreview,
+	type UseV3RedeemReturn,
+} from "./useV3Redeem";
+
+export {
+	useV3RedeemTickets,
+	type V3Ticket,
+	type UseV3RedeemTicketsReturn,
+} from "./useV3RedeemTickets";
+
+export { useIsV3Admin, type UseIsV3AdminReturn } from "./useIsV3Admin";
+
+export {
+	useV3AdminQueue,
+	type UseV3AdminQueueReturn,
+} from "./useV3AdminQueue";
+
+export {
+	useV3AdminLimits,
+	type UseV3AdminLimitsReturn,
+} from "./useV3AdminLimits";
