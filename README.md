@@ -96,6 +96,23 @@ Docker 构建**要求**宿主机项目根目录已有真实的 **`contracts.json
 
 更多说明见 `Dockerfile` 与 `docker-compose.yml` 内注释。
 
+## Cloudflare Pages 等托管平台部署
+
+`contracts.json` 未提交到仓库，而 Cloudflare Pages 是直接从 Git 拉代码构建，没有机会像本地/Docker 那样手动放一份文件进去。为此新增了 `scripts/gen-contracts.mjs`，会在 `bun run build`（即 `next build`）之前自动执行：
+
+- 若构建环境里已经有 `contracts.json`（比如本地、Docker），什么都不做；
+- 否则读取 **`CONTRACTS_JSON`** 环境变量（值为 `contracts.json` 的完整 JSON 内容，可压缩成一行）并据此生成该文件；
+- 两者都没有时会跳过生成，随后 `next.config.ts` 会给出明确的报错提示。
+
+部署步骤：
+
+1. 在 Cloudflare Pages 项目的 **Settings → Environment variables**（Production / Preview 都要配）新增一个变量 `CONTRACTS_JSON`，值粘贴 `contracts.json` 的完整内容（一整段 JSON 字符串，无需转义引号，Cloudflare 会原样存成字符串）。
+2. 同时按需配置 `NEXT_PUBLIC_API_URL`（否则默认走 `http://localhost:3000`，在线上通常不是你想要的）。
+3. Build command 保持 `bun run build`（该脚本用 `bun` 而非 `node` 执行 `gen-contracts.mjs`，是为了本地用 `.env.local` 模拟时也能读到变量；生产环境需要构建环境里有 `bun` 可用，Cloudflare Pages 检测到仓库有 `bun.lock` 时会自动安装并使用 bun，无需额外配置）。Cloudflare 会先跑 `gen-contracts.mjs` 生成 `contracts.json`，再执行 `next build`，合约地址会像本地一样被打进产物里。
+4. 之后如需更换合约地址，直接修改 Cloudflare 项目里的 `CONTRACTS_JSON` 环境变量并触发重新部署即可（无需改代码、无需提交 `contracts.json`）。
+
+> 合约地址属于公开信息（本身就在链上可查），放进环境变量或打进前端 bundle 都没有额外的安全风险，这里的“环境变量”只是解决托管平台构建时缺文件的问题，并非做敏感信息保密。
+
 ## 项目结构（节选）
 
 ```
@@ -107,7 +124,8 @@ Docker 构建**要求**宿主机项目根目录已有真实的 **`contracts.json
 ├── scripts/
 │   ├── docker-build.sh
 │   ├── docker-run.sh
-│   └── run-docker.sh      # 推荐使用：.env.local + compose 构建/启动
+│   ├── run-docker.sh      # 推荐使用：.env.local + compose 构建/启动
+│   └── gen-contracts.mjs  # build 前自动执行：缺 contracts.json 时从 CONTRACTS_JSON 环境变量生成（Cloudflare Pages 等托管平台用）
 ├── src/
 │   ├── app/              # Next.js App Router 页面
 │   ├── components/       # UI（含 ConnectButton 等）

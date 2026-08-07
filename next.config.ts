@@ -11,7 +11,9 @@ const isStandaloneRuntimeDir =
 
 if (!isStandaloneRuntimeDir && !fs.existsSync(contractsPath)) {
 	throw new Error(
-		"缺少 contracts.json：请复制 contracts.example.json 为 contracts.json 并填写合约地址后再运行 dev/build/start。",
+		"缺少 contracts.json：请复制 contracts.example.json 为 contracts.json 并填写合约地址后再运行 dev/build/start。" +
+			"若在 Cloudflare Pages 等无法预置文件的托管平台构建，请改为设置 CONTRACTS_JSON 环境变量" +
+			"（值为 contracts.json 的完整 JSON 内容），`bun run build` 会在构建前自动据此生成该文件（见 scripts/gen-contracts.mjs）。",
 	);
 }
 
