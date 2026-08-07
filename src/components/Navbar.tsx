@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -29,7 +30,18 @@ export default function Navbar() {
 			<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 				<div className="flex h-16 items-center justify-between">
 					<div className="flex items-center gap-6">
-						<Link href="/" className="text-xl font-bold text-white">
+						<Link
+							href="/"
+							className="flex items-center gap-2 text-xl font-bold text-white"
+						>
+							<Image
+								src="/BaCi_token_64x64.png"
+								alt={tCommon("appName")}
+								width={32}
+								height={32}
+								className="rounded-full"
+								priority
+							/>
 							{tCommon("appName")}
 						</Link>
 

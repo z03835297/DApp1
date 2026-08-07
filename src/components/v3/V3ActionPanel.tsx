@@ -16,12 +16,12 @@ const TABS: { key: V3Tab; activeColor: string; bgColor: string; borderColor: str
 		bgColor: "bg-emerald-500/10",
 		borderColor: "border-emerald-400",
 	},
-	{
-		key: "transfer",
-		activeColor: "text-indigo-400",
-		bgColor: "bg-indigo-500/10",
-		borderColor: "border-indigo-400",
-	},
+	// {
+	// 	key: "transfer",
+	// 	activeColor: "text-indigo-400",
+	// 	bgColor: "bg-indigo-500/10",
+	// 	borderColor: "border-indigo-400",
+	// },
 	{
 		key: "redeem",
 		activeColor: "text-amber-400",

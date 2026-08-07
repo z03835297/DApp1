@@ -18,6 +18,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BaCi DApp",
   description: "BaCi DApp",
+  icons: {
+    icon: [{ url: "/BaCi_token_64x64.png", type: "image/png", sizes: "64x64" }],
+    apple: [{ url: "/BaCi_token_64x64.png", type: "image/png", sizes: "64x64" }],
+  },
 };
 
 export default function RootLayout({
