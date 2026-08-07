@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useWalletInfo, useTokenInfo, useUsdtBalance, useAllowance } from "@/hooks";
 
 interface MintPanelProps {
@@ -8,6 +9,8 @@ interface MintPanelProps {
 }
 
 export default function MintPanel({ onSuccess }: MintPanelProps) {
+  const t = useTranslations("mintPanel");
+  const tCommon = useTranslations("common");
   const [amount, setAmount] = useState("");
 
   // 使用自定义 hooks
@@ -59,21 +62,21 @@ export default function MintPanel({ onSuccess }: MintPanelProps) {
     <div className="space-y-6">
       {/* 标题和描述 */}
       <div className="space-y-1">
-        <h3 className="text-xl font-bold text-white">Mint Tokens</h3>
-        <p className="text-sm text-zinc-400">铸造新的代币到你的钱包</p>
+        <h3 className="text-xl font-bold text-white">{t("title")}</h3>
+        <p className="text-sm text-zinc-400">{t("description")}</p>
       </div>
 
       {/* 余额显示 */}
       <div className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-700/30">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-zinc-400">{usdtInfo.name} 余额</span>
+          <span className="text-sm text-zinc-400">{t("balance", { name: usdtInfo.name })}</span>
           <button
             type="button"
             onClick={refreshBalance}
             disabled={isLoadingBalance || !isConnected}
             className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50"
           >
-            {isLoadingBalance ? "刷新中..." : "刷新"}
+            {isLoadingBalance ? tCommon("refreshing") : tCommon("refresh")}
           </button>
         </div>
         <div className="flex items-baseline gap-2">
@@ -90,8 +93,8 @@ export default function MintPanel({ onSuccess }: MintPanelProps) {
         </div>
         <div className="mt-3 pt-3 border-t border-zinc-700/30">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-zinc-400">可兑换 {tokenInfo.name}</span>
-            <span className="text-xs text-zinc-500">1:1 兑换</span>
+            <span className="text-sm text-zinc-400">{t("exchangeable", { name: tokenInfo.name })}</span>
+            <span className="text-xs text-zinc-500">{t("exchangeRate")}</span>
           </div>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-lg font-semibold text-emerald-400">
@@ -111,7 +114,7 @@ export default function MintPanel({ onSuccess }: MintPanelProps) {
       {/* 金额输入 */}
       <div className="space-y-2">
         <label htmlFor="mint-amount" className="block text-sm font-medium text-zinc-300">
-          数量
+          {t("amount")}
         </label>
         <div className="relative">
           <input
@@ -131,12 +134,12 @@ export default function MintPanel({ onSuccess }: MintPanelProps) {
             disabled={!isConnected || isApproving || isMinting}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            MAX
+            {tCommon("max")}
           </button>
         </div>
         {amount && (
           <p className="text-xs text-zinc-500">
-            你将获得 <span className="text-emerald-400 font-medium">{Number(amount).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span> {tokenInfo.symbol}
+            {t("willReceive")} <span className="text-emerald-400 font-medium">{Number(amount).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span> {tokenInfo.symbol}
           </p>
         )}
       </div>
@@ -193,12 +196,12 @@ export default function MintPanel({ onSuccess }: MintPanelProps) {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              授权中...
+              {t("approving")}
             </span>
           ) : isApproved ? (
-            <span>授权完成</span>
+            <span>{t("approved")}</span>
           ) : (
-            <span>授权 {usdtInfo.symbol}</span>
+            <span>{t("approve", { symbol: usdtInfo.symbol })}</span>
           )}
         </button>
 
@@ -245,17 +248,17 @@ export default function MintPanel({ onSuccess }: MintPanelProps) {
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              Minting...
+              {t("minting")}
             </span>
           ) : (
-            <span>Mint {tokenInfo.symbol}</span>
+            <span>{t("mint", { symbol: tokenInfo.symbol })}</span>
           )}
         </button>
       </div>
 
       {/* 提示信息 */}
       <p className="text-xs text-center text-zinc-500">
-        Step 1: 授权 USDT → Step 2: Mint 代币
+        {t("stepHint")}
       </p>
     </div>
   );

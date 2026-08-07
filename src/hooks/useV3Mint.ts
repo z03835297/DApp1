@@ -5,6 +5,7 @@ import { parseUnits, Contract } from "ethers";
 import { useWalletInfo } from "./useWalletInfo";
 import { useV3TokenContract, useV3UsdtContract } from "./useV3Contract";
 import { getErrorMessage, isValidAmount } from "@/lib/v3/errors";
+import { useTranslations } from "next-intl";
 
 export interface UseV3MintReturn {
 	decimals: number;
@@ -22,6 +23,7 @@ export interface UseV3MintReturn {
  * spender 是 Token 合约本身（不再是 Vault）
  */
 export function useV3Mint(): UseV3MintReturn {
+	const t = useTranslations("errors");
 	const [decimals, setDecimals] = useState(6);
 	const [isApproving, setIsApproving] = useState(false);
 	const [isApproved, setIsApproved] = useState(false);
@@ -74,15 +76,15 @@ export function useV3Mint(): UseV3MintReturn {
 	const approve = useCallback(
 		async (amount: string, userBalance?: string): Promise<boolean> => {
 			if (!isValidAmount(amount)) {
-				setError("请输入有效的正数金额");
+				setError(t("invalidAmount"));
 				return false;
 			}
 			if (userBalance !== undefined && Number(amount) > Number(userBalance)) {
-				setError("输入金额超过可用余额");
+				setError(t("exceedsBalance"));
 				return false;
 			}
 			if (!usdtAddress || !usdtAbi || !tokenAddress || !userAddress) {
-				setError("合约未初始化");
+				setError(t("contractNotInit"));
 				return false;
 			}
 
@@ -92,7 +94,7 @@ export function useV3Mint(): UseV3MintReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 
@@ -124,31 +126,31 @@ export function useV3Mint(): UseV3MintReturn {
 				return true;
 			} catch (err) {
 				console.error("V3 approve failed:", err);
-				setError(getErrorMessage(err, "授权失败，请稍后重试"));
+				setError(getErrorMessage(err, t("approveFailed")));
 				return false;
 			} finally {
 				setIsApproving(false);
 			}
 		},
-		[usdtAddress, usdtAbi, tokenAddress, userAddress, getSigner, fetchDecimals],
+		[usdtAddress, usdtAbi, tokenAddress, userAddress, getSigner, fetchDecimals, t],
 	);
 
 	const mint = useCallback(
 		async (amount: string): Promise<boolean> => {
 			if (!isValidAmount(amount)) {
-				setError("请输入有效的正数金额");
+				setError(t("invalidAmount"));
 				return false;
 			}
 			if (!tokenAddress || !tokenAbi) {
-				setError("Token 合约未初始化");
+				setError(t("tokenNotInit"));
 				return false;
 			}
 			if (!isApproved) {
-				setError("请先完成授权（Step 1）");
+				setError(t("approveStepRequired"));
 				return false;
 			}
 			if (approvedAmount && amount !== approvedAmount) {
-				setError("金额与授权金额不一致，请重新授权");
+				setError(t("amountMismatch"));
 				setIsApproved(false);
 				setApprovedAmount("");
 				return false;
@@ -160,14 +162,14 @@ export function useV3Mint(): UseV3MintReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 
 				const dec = await fetchDecimals();
 				const hasEnough = await checkAllowance(amount, dec);
 				if (!hasEnough) {
-					setError("链上授权额度不足，请重新授权");
+					setError(t("allowanceInsufficient"));
 					setIsApproved(false);
 					setApprovedAmount("");
 					return false;
@@ -183,7 +185,7 @@ export function useV3Mint(): UseV3MintReturn {
 				return true;
 			} catch (err) {
 				console.error("V3 mint failed:", err);
-				setError(getErrorMessage(err, "Mint 失败，请稍后重试"));
+				setError(getErrorMessage(err, t("mintFailed")));
 				return false;
 			} finally {
 				setIsMinting(false);
@@ -196,8 +198,7 @@ export function useV3Mint(): UseV3MintReturn {
 			approvedAmount,
 			getSigner,
 			fetchDecimals,
-			checkAllowance,
-		],
+			checkAllowance, t],
 	);
 
 	return {

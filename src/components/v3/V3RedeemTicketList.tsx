@@ -1,16 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useV3RedeemTickets } from "@/hooks";
 import { V3TicketStatus } from "@/lib/type";
-
-const STATUS_LABEL: Record<V3TicketStatus, string> = {
-	[V3TicketStatus.None]: "None",
-	[V3TicketStatus.Pending]: "Pending",
-	[V3TicketStatus.Approved]: "Approved",
-	[V3TicketStatus.Claimed]: "Claimed",
-	[V3TicketStatus.Cancelled]: "Cancelled",
-	[V3TicketStatus.Rejected]: "Rejected",
-};
 
 const STATUS_COLOR: Record<V3TicketStatus, string> = {
 	[V3TicketStatus.None]: "text-zinc-400",
@@ -21,7 +13,19 @@ const STATUS_COLOR: Record<V3TicketStatus, string> = {
 	[V3TicketStatus.Rejected]: "text-red-400",
 };
 
+const STATUS_KEYS: Record<V3TicketStatus, string> = {
+	[V3TicketStatus.None]: "None",
+	[V3TicketStatus.Pending]: "Pending",
+	[V3TicketStatus.Approved]: "Approved",
+	[V3TicketStatus.Claimed]: "Claimed",
+	[V3TicketStatus.Cancelled]: "Cancelled",
+	[V3TicketStatus.Rejected]: "Rejected",
+};
+
 export default function V3RedeemTicketList() {
+	const t = useTranslations("v3.ticketList");
+	const tStatus = useTranslations("ticketStatus");
+	const tCommon = useTranslations("common");
 	const {
 		tickets,
 		isLoading,
@@ -36,10 +40,8 @@ export default function V3RedeemTicketList() {
 		<div className="space-y-6">
 			<div className="flex items-start justify-between gap-4">
 				<div className="space-y-1">
-					<h3 className="text-xl font-bold text-white">Tickets</h3>
-					<p className="text-sm text-zinc-400">
-						查看排队票据；Approved 可 claim，Pending/Approved 可 cancel
-					</p>
+					<h3 className="text-xl font-bold text-white">{t("title")}</h3>
+					<p className="text-sm text-zinc-400">{t("description")}</p>
 				</div>
 				<button
 					type="button"
@@ -47,7 +49,7 @@ export default function V3RedeemTicketList() {
 					disabled={isLoading}
 					className="text-xs text-amber-400 hover:text-amber-300 disabled:opacity-50"
 				>
-					{isLoading ? "加载中..." : "刷新"}
+					{isLoading ? t("loading") : tCommon("refresh")}
 				</button>
 			</div>
 
@@ -58,34 +60,36 @@ export default function V3RedeemTicketList() {
 			)}
 
 			{isLoading && tickets.length === 0 ? (
-				<p className="text-sm text-zinc-500 text-center py-8">加载票据中...</p>
+				<p className="text-sm text-zinc-500 text-center py-8">
+					{t("loadingTickets")}
+				</p>
 			) : tickets.length === 0 ? (
-				<p className="text-sm text-zinc-500 text-center py-8">暂无赎回票据</p>
+				<p className="text-sm text-zinc-500 text-center py-8">{t("empty")}</p>
 			) : (
 				<ul className="space-y-3">
-					{tickets.map((t) => {
-						const canClaim = t.status === V3TicketStatus.Approved;
+					{tickets.map((ticket) => {
+						const canClaim = ticket.status === V3TicketStatus.Approved;
 						const canCancel =
-							t.status === V3TicketStatus.Pending ||
-							t.status === V3TicketStatus.Approved;
+							ticket.status === V3TicketStatus.Pending ||
+							ticket.status === V3TicketStatus.Approved;
 
 						return (
 							<li
-								key={t.ticketId}
+								key={ticket.ticketId}
 								className="bg-zinc-800/40 border border-zinc-700/40 rounded-xl p-4 space-y-3"
 							>
 								<div className="flex items-center justify-between">
 									<span className="text-sm font-semibold text-white">
-										#{t.ticketId}
+										#{ticket.ticketId}
 									</span>
 									<span
-										className={`text-xs font-medium ${STATUS_COLOR[t.status]}`}
+										className={`text-xs font-medium ${STATUS_COLOR[ticket.status]}`}
 									>
-										{STATUS_LABEL[t.status]}
+										{tStatus(STATUS_KEYS[ticket.status])}
 									</span>
 								</div>
 								<p className="text-sm text-zinc-300">
-									金额：{t.amount}
+									{t("amount", { amount: ticket.amount })}
 								</p>
 								{(canClaim || canCancel) && (
 									<div className="flex gap-2">
@@ -93,20 +97,20 @@ export default function V3RedeemTicketList() {
 											<button
 												type="button"
 												disabled={isActing}
-												onClick={() => claim(t.ticketId)}
+												onClick={() => claim(ticket.ticketId)}
 												className="flex-1 py-2 rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50"
 											>
-												Claim
+												{t("claim")}
 											</button>
 										)}
 										{canCancel && (
 											<button
 												type="button"
 												disabled={isActing}
-												onClick={() => cancel(t.ticketId)}
+												onClick={() => cancel(ticket.ticketId)}
 												className="flex-1 py-2 rounded-lg text-sm font-semibold text-white bg-zinc-600 hover:bg-zinc-500 disabled:opacity-50"
 											>
-												Cancel
+												{t("cancel")}
 											</button>
 										)}
 									</div>

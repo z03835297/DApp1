@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
 	useWalletInfo,
 	useV3TokenMeta,
@@ -13,6 +14,8 @@ interface V3MintPanelProps {
 }
 
 export default function V3MintPanel({ onSuccess }: V3MintPanelProps) {
+	const t = useTranslations("v3.mintPanel");
+	const tCommon = useTranslations("common");
 	const [amount, setAmount] = useState("");
 
 	const { isConnected } = useWalletInfo();
@@ -55,22 +58,22 @@ export default function V3MintPanel({ onSuccess }: V3MintPanelProps) {
 	return (
 		<div className="space-y-6">
 			<div className="space-y-1">
-				<h3 className="text-xl font-bold text-white">Mint Tokens</h3>
+				<h3 className="text-xl font-bold text-white">{t("title")}</h3>
 				<p className="text-sm text-zinc-400">
-					存入 USDT，1:1 铸造 Token（approve → mint）
+					{t("description")}
 				</p>
 			</div>
 
 			<div className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-700/30">
 				<div className="flex items-center justify-between mb-2">
-					<span className="text-sm text-zinc-400">{usdtInfo.name} 余额</span>
+					<span className="text-sm text-zinc-400">{t("balance", { name: usdtInfo.name })}</span>
 					<button
 						type="button"
 						onClick={refreshBalance}
 						disabled={isLoadingBalance || !isConnected}
 						className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50"
 					>
-						{isLoadingBalance ? "刷新中..." : "刷新"}
+						{isLoadingBalance ? tCommon("refreshing") : tCommon("refresh")}
 					</button>
 				</div>
 				<div className="flex items-baseline gap-2">
@@ -94,7 +97,7 @@ export default function V3MintPanel({ onSuccess }: V3MintPanelProps) {
 					htmlFor="v3-mint-amount"
 					className="block text-sm font-medium text-zinc-300"
 				>
-					数量
+					{t("amount")}
 				</label>
 				<div className="relative">
 					<input
@@ -114,7 +117,7 @@ export default function V3MintPanel({ onSuccess }: V3MintPanelProps) {
 						disabled={!isConnected || isApproving || isMinting}
 						className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50"
 					>
-						MAX
+						{tCommon("max")}
 					</button>
 				</div>
 			</div>
@@ -144,10 +147,10 @@ export default function V3MintPanel({ onSuccess }: V3MintPanelProps) {
 						{isApproved ? "✓" : "1"}
 					</span>
 					{isApproving
-						? "授权中..."
+						? t("approving")
 						: isApproved
-							? "授权完成"
-							: `授权 ${usdtInfo.symbol}`}
+							? t("approved")
+							: t("approve", { symbol: usdtInfo.symbol })}
 				</button>
 
 				<button
@@ -163,12 +166,12 @@ export default function V3MintPanel({ onSuccess }: V3MintPanelProps) {
 					<span className="flex items-center justify-center w-7 h-7 rounded-full text-sm font-bold bg-white/20">
 						2
 					</span>
-					{isMinting ? "Minting..." : `Mint ${tokenInfo.symbol}`}
+					{isMinting ? t("minting") : t("mint", { symbol: tokenInfo.symbol })}
 				</button>
 			</div>
 
 			<p className="text-xs text-center text-zinc-500">
-				Step 1: 授权 USDT 给 Token → Step 2: Token.mint
+				{t("stepHint")}
 			</p>
 		</div>
 	);

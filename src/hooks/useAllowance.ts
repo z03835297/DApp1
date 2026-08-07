@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { parseUnits } from "ethers";
 import { useWalletInfo } from "./useWalletInfo";
 import { useUsdtContract, useVaultContract } from "./useContract";
+import { useTranslations } from "next-intl";
 
 export interface UseVaultReturn {
 	/** USDT 精度 */
@@ -71,6 +72,7 @@ function getErrorMessage(err: unknown, defaultMsg: string): string {
  * Step 2: 调用 Vault 的 mint 函数
  */
 export function useAllowance(): UseVaultReturn {
+	const t = useTranslations("errors");
 	const [decimals, setDecimals] = useState<number>(6);
 	const [isApproving, setIsApproving] = useState(false);
 	const [isApproved, setIsApproved] = useState(false);
@@ -138,18 +140,18 @@ export function useAllowance(): UseVaultReturn {
 		async (amount: string, userBalance?: string): Promise<boolean> => {
 			// 输入验证
 			if (!isValidAmount(amount)) {
-				setError("请输入有效的正数金额");
+				setError(t("invalidAmount"));
 				return false;
 			}
 
 			// 余额验证（如果提供了余额）
 			if (userBalance !== undefined && Number(amount) > Number(userBalance)) {
-				setError("输入金额超过可用余额");
+				setError(t("exceedsBalance"));
 				return false;
 			}
 
 			if (!usdtAddress || !usdtAbi || !vaultAddress || !userAddress) {
-				setError("合约未初始化");
+				setError(t("contractNotInit"));
 				return false;
 			}
 
@@ -159,7 +161,7 @@ export function useAllowance(): UseVaultReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 
@@ -205,13 +207,13 @@ export function useAllowance(): UseVaultReturn {
 				return true;
 			} catch (err) {
 				console.error("Approve failed:", err);
-				setError(getErrorMessage(err, "授权失败，请稍后重试"));
+				setError(getErrorMessage(err, t("approveFailed")));
 				return false;
 			} finally {
 				setIsApproving(false);
 			}
 		},
-		[usdtAddress, usdtAbi, vaultAddress, userAddress, getSigner, fetchDecimals],
+		[usdtAddress, usdtAbi, vaultAddress, userAddress, getSigner, fetchDecimals, t],
 	);
 
 	// Step 2: 执行 Vault mint
@@ -219,24 +221,24 @@ export function useAllowance(): UseVaultReturn {
 		async (amount: string): Promise<boolean> => {
 			// 输入验证
 			if (!isValidAmount(amount)) {
-				setError("请输入有效的正数金额");
+				setError(t("invalidAmount"));
 				return false;
 			}
 
 			if (!vaultAddress || !vaultAbi) {
-				setError("Vault 合约未初始化");
+				setError(t("vaultNotInit"));
 				return false;
 			}
 
 			// 检查前端授权状态
 			if (!isApproved) {
-				setError("请先完成授权（Step 1）");
+				setError(t("approveStepRequired"));
 				return false;
 			}
 
 			// 验证金额是否与授权金额一致
 			if (approvedAmount && amount !== approvedAmount) {
-				setError("金额与授权金额不一致，请重新授权");
+				setError(t("amountMismatch"));
 				setIsApproved(false);
 				setApprovedAmount("");
 				return false;
@@ -248,7 +250,7 @@ export function useAllowance(): UseVaultReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 
@@ -258,7 +260,7 @@ export function useAllowance(): UseVaultReturn {
 				// 🔒 安全检查：验证链上实际授权额度
 				const hasEnoughAllowance = await checkAllowance(amount, dec);
 				if (!hasEnoughAllowance) {
-					setError("链上授权额度不足，请重新授权");
+					setError(t("allowanceInsufficient"));
 					setIsApproved(false);
 					setApprovedAmount("");
 					return false;
@@ -282,7 +284,7 @@ export function useAllowance(): UseVaultReturn {
 				return true;
 			} catch (err) {
 				console.error("Mint failed:", err);
-				setError(getErrorMessage(err, "Mint 失败，请稍后重试"));
+				setError(getErrorMessage(err, t("mintFailed")));
 				return false;
 			} finally {
 				setIsMinting(false);
@@ -295,8 +297,7 @@ export function useAllowance(): UseVaultReturn {
 			approvedAmount,
 			getSigner,
 			fetchDecimals,
-			checkAllowance,
-		],
+			checkAllowance, t],
 	);
 
 	return {

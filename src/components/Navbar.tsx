@@ -2,21 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { isVersionEnabled } from "@/lib/router";
+import { useTranslations } from "next-intl";
 import ConnectButton from "@/components/ConnectButton";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useIsV3Admin } from "@/hooks";
 
 export default function Navbar() {
 	const pathname = usePathname();
+	const t = useTranslations("nav");
+	const tCommon = useTranslations("common");
 
-	const isV1Active = pathname === "/v1" || pathname.startsWith("/v1/");
-	const isV2Active = pathname === "/v2" || pathname.startsWith("/v2/");
-	const isV3Active =
-		(pathname === "/v3" || pathname.startsWith("/v3/")) &&
-		!pathname.startsWith("/v3/admin");
-	const isAdminActive = pathname.startsWith("/v3/admin");
+	const isHomeActive = pathname === "/";
+	const isAdminActive = pathname === "/admin" || pathname.startsWith("/admin/");
 
-	const isV1Enabled = isVersionEnabled("v1");
 	const { isAdmin } = useIsV3Admin();
 
 	const tabClass = (active: boolean) =>
@@ -32,37 +30,23 @@ export default function Navbar() {
 				<div className="flex h-16 items-center justify-between">
 					<div className="flex items-center gap-6">
 						<Link href="/" className="text-xl font-bold text-white">
-							BaCi DApp
+							{tCommon("appName")}
 						</Link>
 
-						<div className="flex items-center rounded-full bg-white/10 p-1 backdrop-blur-sm">
-							{isV1Enabled ? (
-								<Link href="/v1" className={tabClass(isV1Active)}>
-									V1
+						{isAdmin && (
+							<div className="flex items-center rounded-full bg-white/10 p-1 backdrop-blur-sm">
+								<Link href="/" className={tabClass(isHomeActive)}>
+									{t("home")}
 								</Link>
-							) : (
-								<span
-									className="relative rounded-full px-5 py-1.5 text-sm font-semibold text-white/40 cursor-not-allowed"
-									title="V1 版本已禁用"
-								>
-									V1
-								</span>
-							)}
-							<Link href="/v2" className={tabClass(isV2Active)}>
-								V2
-							</Link>
-							<Link href="/v3" className={tabClass(isV3Active)}>
-								V3
-							</Link>
-							{isAdmin && (
-								<Link href="/v3/admin" className={tabClass(isAdminActive)}>
-									Admin
+								<Link href="/admin" className={tabClass(isAdminActive)}>
+									{t("admin")}
 								</Link>
-							)}
-						</div>
+							</div>
+						)}
 					</div>
 
-					<div className="flex items-center">
+					<div className="flex items-center gap-3">
+						<LanguageSwitcher />
 						<ConnectButton />
 					</div>
 				</div>

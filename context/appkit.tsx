@@ -1,11 +1,13 @@
 "use client";
 
-import { RainbowKitProvider, lightTheme } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider, lightTheme, type Locale } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import { WagmiProvider } from "wagmi";
 import { mainnet, wagmiConfig } from "@/lib/wagmi";
+import { useAppLocale } from "@/i18n/LocaleProvider";
+import { rainbowKitLocaleMap } from "@/i18n/config";
 
 /**
  * 钱包接入 Provider
@@ -27,13 +29,14 @@ export function AppKitProvider({ children }: { children: ReactNode }) {
 				},
 			}),
 	);
+	const { locale } = useAppLocale();
 
 	return (
 		<WagmiProvider config={wagmiConfig}>
 			<QueryClientProvider client={queryClient}>
 				<RainbowKitProvider
 					theme={lightTheme()}
-					locale="zh-CN"
+					locale={rainbowKitLocaleMap[locale] as Locale}
 					initialChain={mainnet}
 				>
 					{children}

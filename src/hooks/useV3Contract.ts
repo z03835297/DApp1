@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { Contract, type ContractRunner } from "ethers";
-import { V3_CONTRACT_ADDRESS, V3_ABI, ChainId } from "@/lib/constants";
+import { V3_CONTRACT_ADDRESS, V3_ABI, V3_USDT_ABI, type ChainId } from "@/lib/constants";
 import { V3ContractName } from "@/lib/type";
 import { useWalletInfo } from "./useWalletInfo";
 
@@ -28,8 +28,12 @@ export function useV3Contract(contractName: V3ContractName): UseV3ContractReturn
 	}, [chainId, isSupportedChain, contractName]);
 
 	const contractAbi = useMemo(() => {
+		if (contractName === V3ContractName.USDT) {
+			if (!chainId) return null;
+			return V3_USDT_ABI[chainId as ChainId] ?? null;
+		}
 		return V3_ABI[contractName] ?? null;
-	}, [contractName]);
+	}, [contractName, chainId]);
 
 	const contract = useMemo(() => {
 		if (!contractAddress || !contractAbi) return null;

@@ -6,11 +6,12 @@
 import type { AppVersion, Feature } from "./type";
 
 // 路由配置
+// 对外默认只开放 V3；V1/V2 代码与路由文件保留，enabled=false 时访问会重定向到 V3
 export const routerConfig = {
-	// 默认版本 - 修改此值可切换默认版本
-	defaultVersion: "v2" as AppVersion,
+	// 默认落地页（当前主页即原 V3 功能，不再走 /v3 路径）
+	defaultPath: "/",
 
-	// 版本信息
+	// 版本信息（V1/V2 保留，默认禁用以免误用）
 	versions: {
 		v1: {
 			name: "V1",
@@ -28,7 +29,7 @@ export const routerConfig = {
 			description: "免 Gas 转账",
 			isStable: false,
 			// 是否启用此版本
-			enabled: true,
+			enabled: false,
 			// V2 支持的功能（多了 transfer）
 			features: ["mint", "withdraw", "transfer"] as Feature[],
 		},
@@ -37,7 +38,7 @@ export const routerConfig = {
 
 // 获取默认版本路径
 export function getDefaultVersionPath(): string {
-	return routerConfig.versions[routerConfig.defaultVersion].path;
+	return routerConfig.defaultPath;
 }
 
 // 获取版本信息

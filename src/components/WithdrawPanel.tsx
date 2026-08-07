@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useWalletInfo, useTokenInfo, useTokenBalance, useWithdraw } from "@/hooks";
 
 interface WithdrawPanelProps {
@@ -8,6 +9,8 @@ interface WithdrawPanelProps {
 }
 
 export default function WithdrawPanel({ onSuccess }: WithdrawPanelProps) {
+  const t = useTranslations("withdrawPanel");
+  const tCommon = useTranslations("common");
   const [amount, setAmount] = useState("");
 
   // 使用自定义 hooks
@@ -50,21 +53,21 @@ export default function WithdrawPanel({ onSuccess }: WithdrawPanelProps) {
     <div className="space-y-6">
       {/* 标题和描述 */}
       <div className="space-y-1">
-        <h3 className="text-xl font-bold text-white">Withdraw {usdtInfo.symbol}</h3>
-        <p className="text-sm text-zinc-400">将代币兑换回 {usdtInfo.symbol}</p>
+        <h3 className="text-xl font-bold text-white">{t("title", { symbol: usdtInfo.symbol })}</h3>
+        <p className="text-sm text-zinc-400">{t("description", { symbol: usdtInfo.symbol })}</p>
       </div>
 
       {/* 余额显示 */}
       <div className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-700/30">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-zinc-400">{tokenInfo.name} 余额</span>
+          <span className="text-sm text-zinc-400">{t("balance", { name: tokenInfo.name })}</span>
           <button
             type="button"
             onClick={refreshBalance}
             disabled={isLoadingBalance || !isConnected}
             className="text-xs text-amber-400 hover:text-amber-300 transition-colors disabled:opacity-50"
           >
-            {isLoadingBalance ? "刷新中..." : "刷新"}
+            {isLoadingBalance ? tCommon("refreshing") : tCommon("refresh")}
           </button>
         </div>
         <div className="flex items-baseline gap-2">
@@ -81,8 +84,8 @@ export default function WithdrawPanel({ onSuccess }: WithdrawPanelProps) {
         </div>
         <div className="mt-3 pt-3 border-t border-zinc-700/30">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-zinc-400">可兑换 {usdtInfo.name}</span>
-            <span className="text-xs text-zinc-500">1:1 兑换</span>
+            <span className="text-sm text-zinc-400">{t("exchangeable", { name: usdtInfo.name })}</span>
+            <span className="text-xs text-zinc-500">{t("exchangeRate")}</span>
           </div>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-lg font-semibold text-amber-400">
@@ -102,7 +105,7 @@ export default function WithdrawPanel({ onSuccess }: WithdrawPanelProps) {
       {/* 金额输入 */}
       <div className="space-y-2">
         <label htmlFor="withdraw-amount" className="block text-sm font-medium text-zinc-300">
-          数量
+          {t("amount")}
         </label>
         <div className="relative">
           <input
@@ -122,12 +125,12 @@ export default function WithdrawPanel({ onSuccess }: WithdrawPanelProps) {
             disabled={!isConnected || isWithdrawing}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            MAX
+            {tCommon("max")}
           </button>
         </div>
         {amount && (
           <p className="text-xs text-zinc-500">
-            你将获得 <span className="text-amber-400 font-medium">{Number(amount).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span> {usdtInfo.symbol}
+            {t("willReceive")} <span className="text-amber-400 font-medium">{Number(amount).toLocaleString(undefined, { maximumFractionDigits: 6 })}</span> {usdtInfo.symbol}
           </p>
         )}
       </div>
@@ -169,16 +172,16 @@ export default function WithdrawPanel({ onSuccess }: WithdrawPanelProps) {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            Withdrawing...
+            {t("withdrawing")}
           </span>
         ) : (
-          <span>Withdraw {tokenInfo.symbol}</span>
+          <span>{t("withdraw", { symbol: tokenInfo.symbol })}</span>
         )}
       </button>
 
       {/* 提示信息 */}
       <p className="text-xs text-center text-zinc-500">
-        将 {tokenInfo.symbol} 兑换回 {usdtInfo.symbol}，无需授权
+        {t("hint", { tokenSymbol: tokenInfo.symbol, usdtSymbol: usdtInfo.symbol })}
       </p>
     </div>
   );

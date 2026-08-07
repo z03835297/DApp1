@@ -1,99 +1,57 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { parseUnits, randomBytes, hexlify } from "ethers";
+import { useState, useCallback, useEffect } from "react";
+import { parseUnits, randomBytes, hexlify, formatUnits } from "ethers";
 import { useWalletInfo } from "./useWalletInfo";
-import { useTokenContract } from "./useContract";
-import { TRANSFER_FEE } from "@/lib/constants";
+import { useV3TokenContract } from "./useV3Contract";
+import { isValidAddress, isValidAmount } from "@/lib/v3/errors";
+import { readTokenTax } from "@/lib/v3/tax";
+import type {
+	TransferAuthPayload,
+	UseTransferWithAuthReturn,
+} from "./useTransferWithAuth";
 import { useTranslations } from "next-intl";
 
-/** EIP-712 Domain 信息 */
-export interface TransferAuthDomain {
-	/** 链 ID */
-	chainId: number;
-	/** 合约名称 */
-	name: string;
-	/** 验证合约地址 */
-	verifyingContract: string;
-	/** 版本号 */
-	version: string;
-}
-
-/** 转账消息 */
-export interface TransferAuthMessage {
-	/** 发送者地址 */
-	from: string;
-	/** 接收者地址 */
-	to: string;
-	/** 转账金额 (wei) */
-	value: string;
-	/** 生效时间戳 */
-	validAfter: number;
-	/** 失效时间戳 */
-	validBefore: number;
-	/** 唯一 nonce (bytes32) */
-	nonce: string;
-	/** 完整签名 */
-	signature: string;
-}
-
-export interface TransferAuthPayload {
-	/** EIP-712 Domain */
-	domain: TransferAuthDomain;
-	/** 转账消息 */
-	message: TransferAuthMessage;
-}
-
-export interface UseTransferWithAuthReturn {
-	/** 是否正在签名 */
-	isSigning: boolean;
-	/** 错误信息 */
-	error: string | null;
-	/** 签名结果 */
-	payload: TransferAuthPayload | null;
-	/** 执行签名 */
-	signTransferAuth: (
-		to: string,
-		amount: string,
-		userBalance?: string,
-	) => Promise<TransferAuthPayload | null>;
-	/** 清除错误 */
-	clearError: () => void;
-	/** 清除 payload */
-	clearPayload: () => void;
+export interface UseV3TransferWithAuthReturn extends UseTransferWithAuthReturn {
+	/** 固定税额（token 单位） */
+	taxAmount: string;
 }
 
 /**
- * 验证地址格式是否有效
+ * V3 TransferWithAuthorization 签名 Hook (EIP-3009)
+ * 用于免 Gas 转账：用户仅签名，由服务端代付 Gas 执行
  */
-function isValidAddress(address: string): boolean {
-	return /^0x[a-fA-F0-9]{40}$/.test(address);
-}
-
-/**
- * 验证金额输入是否有效
- */
-function isValidAmount(amount: string): boolean {
-	if (!amount || amount.trim() === "") return false;
-	if (!/^\d*\.?\d*$/.test(amount)) return false;
-	const num = Number(amount);
-	if (Number.isNaN(num) || !Number.isFinite(num)) return false;
-	if (num <= 0) return false;
-	return true;
-}
-
-/**
- * TransferWithAuthorization 签名 Hook (EIP-3009)
- * 用于 V2 免 Gas 转账功能
- */
-export function useTransferWithAuth(): UseTransferWithAuthReturn {
+export function useV3TransferWithAuth(): UseV3TransferWithAuthReturn {
 	const t = useTranslations("errors");
 	const [isSigning, setIsSigning] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [payload, setPayload] = useState<TransferAuthPayload | null>(null);
+	const [taxAmount, setTaxAmount] = useState("0");
 
 	const { address, getSigner } = useWalletInfo();
-	const { address: tokenAddress, contract: tokenContract } = useTokenContract();
+	const { address: tokenAddress, contract: tokenContract } =
+		useV3TokenContract();
+
+	useEffect(() => {
+		if (!tokenContract) return;
+		let cancelled = false;
+		(async () => {
+			try {
+				const [dec, tax] = await Promise.all([
+					tokenContract.decimals(),
+					readTokenTax(tokenContract),
+				]);
+				if (!cancelled) {
+					setTaxAmount(formatUnits(tax, Number(dec)));
+				}
+			} catch {
+				// keep default
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [tokenContract]);
 
 	const signTransferAuth = useCallback(
 		async (
@@ -101,24 +59,23 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 			amount: string,
 			userBalance?: string,
 		): Promise<TransferAuthPayload | null> => {
-			// 地址验证
 			if (!isValidAddress(to)) {
 				setError(t("invalidAddress"));
 				return null;
 			}
 
-			// 金额验证
 			if (!isValidAmount(amount)) {
 				setError(t("invalidAmount"));
 				return null;
 			}
 
-			// 余额验证（如果提供了余额）- 需要检查 金额 + 手续费
-			if (
-				userBalance !== undefined &&
-				Number(amount) + TRANSFER_FEE > Number(userBalance)
-			) {
-				setError(t("insufficientBalanceFee", { fee: TRANSFER_FEE }));
+			if (Number(amount) <= Number(taxAmount)) {
+				setError(t("amountMustExceedTax", { tax: taxAmount }));
+				return null;
+			}
+
+			if (userBalance !== undefined && Number(amount) > Number(userBalance)) {
+				setError(t("exceedsBalance"));
 				return null;
 			}
 
@@ -137,13 +94,9 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 					return null;
 				}
 
-				// 获取 token decimals
 				const decimals = await tokenContract.decimals();
-				// 签名的金额需要包含手续费
-				const totalAmount = Number(amount) + TRANSFER_FEE;
-				const value = parseUnits(totalAmount.toString(), Number(decimals));
+				const value = parseUnits(amount, Number(decimals));
 
-				// 生成随机 nonce (bytes32)
 				const nonce = hexlify(randomBytes(32));
 
 				// 合约 MAX_AUTH_WINDOW = 15 分钟(900s)，且校验的是 validBefore - validAfter（而非
@@ -155,8 +108,6 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 				const validAfter = now - CLOCK_SKEW_BUFFER_SECONDS;
 				const validBefore = validAfter + MAX_AUTH_WINDOW_SECONDS;
 
-				// 获取 EIP-712 domain 信息
-				// eip712Domain() 返回: [fields, name, version, chainId, verifyingContract, salt, extensions]
 				const domainData = await tokenContract.eip712Domain();
 
 				const domain = {
@@ -166,7 +117,6 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 					verifyingContract: domainData[4] as string,
 				};
 
-				// EIP-3009 TransferWithAuthorization types
 				const types = {
 					TransferWithAuthorization: [
 						{ name: "from", type: "address" },
@@ -187,9 +137,7 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 					nonce,
 				};
 
-				// 使用 EIP-712 签名
 				const signature = await signer.signTypedData(domain, types, message);
-				// const sig = Signature.from(signature);
 				const result: TransferAuthPayload = {
 					domain: {
 						chainId: domain.chainId,
@@ -209,12 +157,10 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 				};
 
 				setPayload(result);
-
 				return result;
 			} catch (err) {
-				console.error("Signing failed:", err);
+				console.error("V3 signing failed:", err);
 				if (err instanceof Error) {
-					// 用户取消签名
 					if (
 						err.message.includes("user rejected") ||
 						err.message.includes("User rejected")
@@ -231,7 +177,7 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 				setIsSigning(false);
 			}
 		},
-		[address, tokenAddress, tokenContract, getSigner, t],
+		[address, tokenAddress, tokenContract, taxAmount, getSigner, t],
 	);
 
 	const clearError = useCallback(() => setError(null), []);
@@ -241,6 +187,7 @@ export function useTransferWithAuth(): UseTransferWithAuthReturn {
 		isSigning,
 		error,
 		payload,
+		taxAmount,
 		signTransferAuth,
 		clearError,
 		clearPayload,

@@ -6,6 +6,7 @@ import { useWalletInfo } from "./useWalletInfo";
 import { useV3LimitGateContract, useV3TokenContract } from "./useV3Contract";
 import { useV3LimitInfo } from "./useV3LimitInfo";
 import { getErrorMessage, isValidAmount } from "@/lib/v3/errors";
+import { useTranslations } from "next-intl";
 
 export interface UseV3AdminLimitsReturn {
 	perTxLimit: string;
@@ -24,6 +25,7 @@ export interface UseV3AdminLimitsReturn {
  * Admin：读写 LimitGate 限额
  */
 export function useV3AdminLimits(): UseV3AdminLimitsReturn {
+	const t = useTranslations("errors");
 	const [isUpdating, setIsUpdating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -46,11 +48,11 @@ export function useV3AdminLimits(): UseV3AdminLimitsReturn {
 	const setPerTxLimit = useCallback(
 		async (limit: string): Promise<boolean> => {
 			if (!isValidAmount(limit) && limit !== "0") {
-				setError("请输入有效的限额（可为 0）");
+				setError(t("invalidLimit"));
 				return false;
 			}
 			if (!gateAddress || !gateAbi) {
-				setError("LimitGate 未初始化");
+				setError(t("gateNotInit"));
 				return false;
 			}
 
@@ -60,7 +62,7 @@ export function useV3AdminLimits(): UseV3AdminLimitsReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 
@@ -74,23 +76,23 @@ export function useV3AdminLimits(): UseV3AdminLimitsReturn {
 				return true;
 			} catch (err) {
 				console.error("setPerTxLimit failed:", err);
-				setError(getErrorMessage(err, "设置单笔上限失败"));
+				setError(getErrorMessage(err, t("setPerTxFailed")));
 				return false;
 			} finally {
 				setIsUpdating(false);
 			}
 		},
-		[gateAddress, gateAbi, tokenContract, getSigner, refresh],
+		[gateAddress, gateAbi, tokenContract, getSigner, refresh, t],
 	);
 
 	const setGlobalDailyLimit = useCallback(
 		async (limit: string): Promise<boolean> => {
 			if (!isValidAmount(limit) && limit !== "0") {
-				setError("请输入有效的限额（可为 0）");
+				setError(t("invalidLimit"));
 				return false;
 			}
 			if (!gateAddress || !gateAbi) {
-				setError("LimitGate 未初始化");
+				setError(t("gateNotInit"));
 				return false;
 			}
 
@@ -100,7 +102,7 @@ export function useV3AdminLimits(): UseV3AdminLimitsReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 
@@ -116,13 +118,13 @@ export function useV3AdminLimits(): UseV3AdminLimitsReturn {
 				return true;
 			} catch (err) {
 				console.error("setGlobalDailyLimit failed:", err);
-				setError(getErrorMessage(err, "设置日上限失败"));
+				setError(getErrorMessage(err, t("setDailyFailed")));
 				return false;
 			} finally {
 				setIsUpdating(false);
 			}
 		},
-		[gateAddress, gateAbi, tokenContract, getSigner, refresh],
+		[gateAddress, gateAbi, tokenContract, getSigner, refresh, t],
 	);
 
 	return {

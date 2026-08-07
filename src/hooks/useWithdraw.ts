@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { parseUnits } from "ethers";
 import { useWalletInfo } from "./useWalletInfo";
 import { useVaultContract, useTokenContract } from "./useContract";
+import { useTranslations } from "next-intl";
 
 export interface UseWithdrawReturn {
 	/** Token 精度 */
@@ -64,6 +65,7 @@ function getErrorMessage(err: unknown, defaultMsg: string): string {
  * 调用 Vault 的 burnAndWithdraw 函数，将 Token 转换回 USDT
  */
 export function useWithdraw(): UseWithdrawReturn {
+	const t = useTranslations("errors");
 	const [decimals, setDecimals] = useState<number>(6);
 	const [isWithdrawing, setIsWithdrawing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -95,18 +97,18 @@ export function useWithdraw(): UseWithdrawReturn {
 		async (amount: string, userBalance?: string): Promise<boolean> => {
 			// 输入验证
 			if (!isValidAmount(amount)) {
-				setError("请输入有效的正数金额");
+				setError(t("invalidAmount"));
 				return false;
 			}
 
 			// 余额验证（如果提供了余额）
 			if (userBalance !== undefined && Number(amount) > Number(userBalance)) {
-				setError("输入金额超过可用余额");
+				setError(t("exceedsBalance"));
 				return false;
 			}
 
 			if (!vaultAddress || !vaultAbi) {
-				setError("Vault 合约未初始化");
+				setError(t("vaultNotInit"));
 				return false;
 			}
 
@@ -116,7 +118,7 @@ export function useWithdraw(): UseWithdrawReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 
@@ -138,13 +140,13 @@ export function useWithdraw(): UseWithdrawReturn {
 				return true;
 			} catch (err) {
 				console.error("Withdraw failed:", err);
-				setError(getErrorMessage(err, "Withdraw 失败，请稍后重试"));
+				setError(getErrorMessage(err, t("withdrawFailed")));
 				return false;
 			} finally {
 				setIsWithdrawing(false);
 			}
 		},
-		[vaultAddress, vaultAbi, getSigner, fetchDecimals],
+		[vaultAddress, vaultAbi, getSigner, fetchDecimals, t],
 	);
 
 	return {

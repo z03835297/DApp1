@@ -1,6 +1,6 @@
 /**
  * V3 LimitGate 合约 ABI
- * 来源：Sepolia Etherscan 已验证合约 0x8C10557Ad330FF722F05B61298689Df59b94f4A3
+ * 来源：Sepolia Etherscan 已验证合约 0x8a78621620c0e27b0e30c62f0d12eade5c6da8a1
  * 构造参数：(perTxLimit_, globalDailyLimit_)
  */
 export const LIMIT_GATE_ABI = [

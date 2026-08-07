@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import V3MintPanel from "./V3MintPanel";
 import V3TransferPanel from "./V3TransferPanel";
 import V3RedeemPanel from "./V3RedeemPanel";
@@ -8,31 +9,27 @@ import V3RedeemTicketList from "./V3RedeemTicketList";
 
 type V3Tab = "mint" | "transfer" | "redeem" | "tickets";
 
-const TABS: { key: V3Tab; label: string; activeColor: string; bgColor: string; borderColor: string }[] = [
+const TABS: { key: V3Tab; activeColor: string; bgColor: string; borderColor: string }[] = [
 	{
 		key: "mint",
-		label: "Mint",
 		activeColor: "text-emerald-400",
 		bgColor: "bg-emerald-500/10",
 		borderColor: "border-emerald-400",
 	},
 	{
 		key: "transfer",
-		label: "Transfer",
 		activeColor: "text-indigo-400",
 		bgColor: "bg-indigo-500/10",
 		borderColor: "border-indigo-400",
 	},
 	{
 		key: "redeem",
-		label: "Redeem",
 		activeColor: "text-amber-400",
 		bgColor: "bg-amber-500/10",
 		borderColor: "border-amber-400",
 	},
 	{
 		key: "tickets",
-		label: "Tickets",
 		activeColor: "text-cyan-400",
 		bgColor: "bg-cyan-500/10",
 		borderColor: "border-cyan-400",
@@ -48,14 +45,9 @@ function SuccessModal({
 	onClose: () => void;
 	actionType: V3Tab;
 }) {
-	if (!isOpen) return null;
+	const t = useTranslations("v3.actionPanel");
 
-	const titles: Record<V3Tab, string> = {
-		mint: "Mint 成功！",
-		transfer: "Transfer 成功！",
-		redeem: "Redeem 已提交！",
-		tickets: "操作成功！",
-	};
+	if (!isOpen) return null;
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -63,21 +55,21 @@ function SuccessModal({
 				type="button"
 				className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
 				onClick={onClose}
-				aria-label="关闭弹窗"
+				aria-label={t("closeAria")}
 			/>
 			<div className="relative bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl border border-zinc-700/50 shadow-2xl p-8 max-w-sm mx-4">
 				<h3 className="text-xl font-bold text-white text-center mb-2">
-					{titles[actionType]}
+					{t(`success.${actionType}`)}
 				</h3>
 				<p className="text-sm text-zinc-400 text-center mb-6">
-					交易已确认，请刷新余额查看结果
+					{t("confirmedHint")}
 				</p>
 				<button
 					type="button"
 					onClick={onClose}
 					className="w-full py-3 px-6 rounded-xl font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-90"
 				>
-					确定
+					{t("confirm")}
 				</button>
 			</div>
 		</div>
@@ -85,6 +77,7 @@ function SuccessModal({
 }
 
 export default function V3ActionPanel() {
+	const t = useTranslations("v3.actionPanel.tabs");
 	const [activeTab, setActiveTab] = useState<V3Tab>("mint");
 	const [showSuccess, setShowSuccess] = useState(false);
 	const [successAction, setSuccessAction] = useState<V3Tab>("mint");
@@ -126,7 +119,7 @@ export default function V3ActionPanel() {
 										: "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700/30"
 								}`}
 							>
-								{tab.label}
+								{t(tab.key)}
 							</button>
 						);
 					})}

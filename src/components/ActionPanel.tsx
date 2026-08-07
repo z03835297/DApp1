@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import MintPanel from "./MintPanel";
 import WithdrawPanel from "./WithdrawPanel";
 import TransferPanel from "./TransferPanel";
@@ -10,22 +11,18 @@ import type { Feature } from "@/lib/type";
 
 type ActionType = Feature;
 
-// Tab 配置
-const TAB_CONFIG: Record<Feature, { label: string; activeColor: string; bgColor: string; borderColor: string }> = {
+const TAB_STYLE: Record<Feature, { activeColor: string; bgColor: string; borderColor: string }> = {
   mint: {
-    label: "Mint",
     activeColor: "text-emerald-400",
     bgColor: "bg-emerald-500/10",
     borderColor: "border-emerald-400",
   },
   withdraw: {
-    label: "Withdraw",
     activeColor: "text-amber-400",
     bgColor: "bg-amber-500/10",
     borderColor: "border-amber-400",
   },
   transfer: {
-    label: "Transfer",
     activeColor: "text-indigo-400",
     bgColor: "bg-indigo-500/10",
     borderColor: "border-indigo-400",
@@ -42,33 +39,31 @@ function SuccessModal({
   onClose: () => void; 
   actionType: ActionType;
 }) {
+  const t = useTranslations("actionPanel.success");
+
   if (!isOpen) return null;
 
-  const config: Record<ActionType, { title: string; message: string; bgColor: string; iconBg: string; iconColor: string }> = {
+  const style: Record<ActionType, { bgColor: string; iconBg: string; iconColor: string }> = {
     mint: {
-      title: "Mint 成功！",
-      message: "代币已成功铸造到你的钱包",
       bgColor: "from-emerald-500 to-teal-500",
       iconBg: "bg-emerald-500/20",
       iconColor: "text-emerald-400",
     },
     withdraw: {
-      title: "Withdraw 成功！",
-      message: "代币已成功兑换回 USDT",
       bgColor: "from-amber-500 to-orange-500",
       iconBg: "bg-amber-500/20",
       iconColor: "text-amber-400",
     },
     transfer: {
-      title: "Transfer 成功！",
-      message: "代币已成功转账",
       bgColor: "from-indigo-500 to-purple-500",
       iconBg: "bg-indigo-500/20",
       iconColor: "text-indigo-400",
     },
   };
 
-  const { title, message, bgColor, iconBg, iconColor } = config[actionType];
+  const title = t(`${actionType}.title`);
+  const message = t(`${actionType}.message`);
+  const { bgColor, iconBg, iconColor } = style[actionType];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -77,7 +72,7 @@ function SuccessModal({
         type="button"
         className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-default"
         onClick={onClose}
-        aria-label="关闭弹窗"
+        aria-label={t("closeAria")}
       />
       
       {/* 弹窗内容 */}
@@ -91,7 +86,7 @@ function SuccessModal({
             stroke="currentColor"
             aria-hidden="true"
           >
-            <title>成功</title>
+            <title>{t("iconTitle")}</title>
             <path 
               strokeLinecap="round" 
               strokeLinejoin="round" 
@@ -117,7 +112,7 @@ function SuccessModal({
           onClick={onClose}
           className={`w-full py-3 px-6 rounded-xl font-semibold text-white transition-all duration-200 bg-gradient-to-r ${bgColor} hover:opacity-90 shadow-lg`}
         >
-          确定
+          {t("confirm")}
         </button>
       </div>
     </div>
@@ -125,6 +120,7 @@ function SuccessModal({
 }
 
 export default function ActionPanel() {
+  const t = useTranslations("actionPanel.tabs");
   const version = useVersion();
   const [activeTab, setActiveTab] = useState<ActionType>("mint");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -166,7 +162,7 @@ export default function ActionPanel() {
         {/* Tab 切换 */}
         <div className="flex border-b border-zinc-700/50">
           {availableFeatures.map((feature) => {
-            const config = TAB_CONFIG[feature];
+            const style = TAB_STYLE[feature];
             const isActive = effectiveTab === feature;
 
             return (
@@ -176,11 +172,11 @@ export default function ActionPanel() {
                 type="button"
                 className={`flex-1 py-4 px-6 text-sm font-semibold transition-all duration-200 ${
                   isActive
-                    ? `${config.activeColor} ${config.bgColor} border-b-2 ${config.borderColor}`
+                    ? `${style.activeColor} ${style.bgColor} border-b-2 ${style.borderColor}`
                     : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700/30"
                 }`}
               >
-                {config.label}
+                {t(feature)}
               </button>
             );
           })}

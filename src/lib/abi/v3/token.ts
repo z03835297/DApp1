@@ -1,7 +1,17 @@
 /**
  * V3 Token 合约 ABI
- * 来源：Sepolia Etherscan 已验证合约 0x9C79BeaE0d9eBE8530A4F5B86c8445c62F234c89
- * 构造参数：(usdt_, name_, symbol_, limitGate_, redeemQueue_, investmentVault_)
+ * 来源：Sepolia Etherscan 已验证合约 0x447aa44242d6f14edf88c0f6b67c3d0ad2113b3a
+ *（与 Mainnet 合约 0x67d3B094D160bE78258603A0cE7702823c60756F 字节码一致，仅地址不同）
+ * 构造参数：(usdt_, name_, symbol_, limitGate_, redeemQueue_, investmentVault_, initialAdmin_)
+ *
+ * 2026-08-06 Sepolia 合约重新部署后与本文件同步的变更：
+ * - 移除 `taxAmount()` / `setTaxAmount()`（只保留 `tax()` / `setTax()`）
+ * - 移除 `queueBurn()` / `queuePayUsdt()`，改为 `queueSettle()`
+ * - 移除 `rescueOtherToken()`、`TokenRescued` 事件
+ * - 新增迁移目标治理：`migrationTarget` / `proposeMigrationTarget` / `acceptMigrationTarget` /
+ *   `cancelPendingMigrationTarget` / `migrationTargetEffectiveTime` / `migrateReserve` /
+ *   `totalMigrated` / `MIGRATION_TIMELOCK` 及对应事件
+ * - 构造函数新增 `initialAdmin_` 参数
  */
 export const TOKEN_ABI = [
 	{
@@ -12,6 +22,7 @@ export const TOKEN_ABI = [
 			{ internalType: "address", name: "limitGate_", type: "address" },
 			{ internalType: "address", name: "redeemQueue_", type: "address" },
 			{ internalType: "address", name: "investmentVault_", type: "address" },
+			{ internalType: "address", name: "initialAdmin_", type: "address" },
 		],
 		stateMutability: "nonpayable",
 		type: "constructor",
@@ -160,6 +171,22 @@ export const TOKEN_ABI = [
 		name: "InvestmentVaultProposed",
 		type: "event",
 	},
+	{ anonymous: false, inputs: [], name: "MigrationTargetCancelled", type: "event" },
+	{
+		anonymous: false,
+		inputs: [{ indexed: true, internalType: "address", name: "target", type: "address" }],
+		name: "MigrationTargetChanged",
+		type: "event",
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{ indexed: true, internalType: "address", name: "target", type: "address" },
+			{ indexed: false, internalType: "uint256", name: "effectiveTime", type: "uint256" },
+		],
+		name: "MigrationTargetProposed",
+		type: "event",
+	},
 	{
 		anonymous: false,
 		inputs: [
@@ -182,6 +209,15 @@ export const TOKEN_ABI = [
 			{ indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
 		],
 		name: "Redeemed",
+		type: "event",
+	},
+	{
+		anonymous: false,
+		inputs: [
+			{ indexed: true, internalType: "address", name: "target", type: "address" },
+			{ indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
+		],
+		name: "ReserveMigrated",
 		type: "event",
 	},
 	{
@@ -236,16 +272,6 @@ export const TOKEN_ABI = [
 	{
 		anonymous: false,
 		inputs: [
-			{ indexed: true, internalType: "address", name: "token", type: "address" },
-			{ indexed: true, internalType: "address", name: "to", type: "address" },
-			{ indexed: false, internalType: "uint256", name: "amount", type: "uint256" },
-		],
-		name: "TokenRescued",
-		type: "event",
-	},
-	{
-		anonymous: false,
-		inputs: [
 			{ indexed: true, internalType: "address", name: "from", type: "address" },
 			{ indexed: true, internalType: "address", name: "to", type: "address" },
 			{ indexed: false, internalType: "uint256", name: "value", type: "uint256" },
@@ -291,6 +317,13 @@ export const TOKEN_ABI = [
 	},
 	{
 		inputs: [],
+		name: "MIGRATION_TIMELOCK",
+		outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [],
 		name: "TRANSFER_WITH_AUTHORIZATION_TYPEHASH",
 		outputs: [{ internalType: "bytes32", name: "", type: "bytes32" }],
 		stateMutability: "view",
@@ -314,6 +347,13 @@ export const TOKEN_ABI = [
 	{
 		inputs: [],
 		name: "acceptInvestmentVault",
+		outputs: [],
+		stateMutability: "nonpayable",
+		type: "function",
+	},
+	{
+		inputs: [],
+		name: "acceptMigrationTarget",
 		outputs: [],
 		stateMutability: "nonpayable",
 		type: "function",
@@ -398,6 +438,13 @@ export const TOKEN_ABI = [
 	},
 	{
 		inputs: [],
+		name: "cancelPendingMigrationTarget",
+		outputs: [],
+		stateMutability: "nonpayable",
+		type: "function",
+	},
+	{
+		inputs: [],
 		name: "decimals",
 		outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
 		stateMutability: "pure",
@@ -447,6 +494,27 @@ export const TOKEN_ABI = [
 		type: "function",
 	},
 	{
+		inputs: [{ internalType: "uint256", name: "amount", type: "uint256" }],
+		name: "migrateReserve",
+		outputs: [],
+		stateMutability: "nonpayable",
+		type: "function",
+	},
+	{
+		inputs: [],
+		name: "migrationTarget",
+		outputs: [{ internalType: "address", name: "", type: "address" }],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [],
+		name: "migrationTargetEffectiveTime",
+		outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
 		inputs: [{ internalType: "uint256", name: "usdtAmount", type: "uint256" }],
 		name: "mint",
 		outputs: [],
@@ -483,6 +551,13 @@ export const TOKEN_ABI = [
 		type: "function",
 	},
 	{
+		inputs: [],
+		name: "pendingMigrationTarget",
+		outputs: [{ internalType: "address", name: "", type: "address" }],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
 		inputs: [{ internalType: "address", name: "newVault", type: "address" }],
 		name: "proposeInvestmentVault",
 		outputs: [],
@@ -490,8 +565,8 @@ export const TOKEN_ABI = [
 		type: "function",
 	},
 	{
-		inputs: [{ internalType: "uint256", name: "amount", type: "uint256" }],
-		name: "queueBurn",
+		inputs: [{ internalType: "address", name: "newTarget", type: "address" }],
+		name: "proposeMigrationTarget",
 		outputs: [],
 		stateMutability: "nonpayable",
 		type: "function",
@@ -501,7 +576,7 @@ export const TOKEN_ABI = [
 			{ internalType: "address", name: "to", type: "address" },
 			{ internalType: "uint256", name: "amount", type: "uint256" },
 		],
-		name: "queuePayUsdt",
+		name: "queueSettle",
 		outputs: [],
 		stateMutability: "nonpayable",
 		type: "function",
@@ -552,16 +627,6 @@ export const TOKEN_ABI = [
 		type: "function",
 	},
 	{
-		inputs: [
-			{ internalType: "address", name: "token", type: "address" },
-			{ internalType: "address", name: "to", type: "address" },
-		],
-		name: "rescueOtherToken",
-		outputs: [],
-		stateMutability: "nonpayable",
-		type: "function",
-	},
-	{
 		inputs: [{ internalType: "address", name: "to", type: "address" }],
 		name: "rescueSelfToken",
 		outputs: [],
@@ -577,7 +642,7 @@ export const TOKEN_ABI = [
 	},
 	{
 		inputs: [{ internalType: "uint256", name: "amount", type: "uint256" }],
-		name: "setTaxAmount",
+		name: "setTax",
 		outputs: [],
 		stateMutability: "nonpayable",
 		type: "function",
@@ -608,7 +673,7 @@ export const TOKEN_ABI = [
 	},
 	{
 		inputs: [],
-		name: "taxAmount",
+		name: "tax",
 		outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
 		stateMutability: "view",
 		type: "function",
@@ -617,6 +682,13 @@ export const TOKEN_ABI = [
 		inputs: [],
 		name: "taxReceiver",
 		outputs: [{ internalType: "address", name: "", type: "address" }],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [],
+		name: "totalMigrated",
+		outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
 		stateMutability: "view",
 		type: "function",
 	},

@@ -9,6 +9,7 @@ import {
 	useV3UsdtContract,
 } from "./useV3Contract";
 import { getErrorMessage, isValidAmount } from "@/lib/v3/errors";
+import { useTranslations } from "next-intl";
 
 export type RedeemOutcome =
 	| { kind: "instant" }
@@ -34,6 +35,8 @@ export interface UseV3RedeemReturn {
  * V3 Redeem：预判即时/入队，调用 Token.redeem，解析回执区分结果
  */
 export function useV3Redeem(): UseV3RedeemReturn {
+	const t = useTranslations("errors");
+	const tRedeem = useTranslations("v3.redeemPanel");
 	const [isRedeeming, setIsRedeeming] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [lastOutcome, setLastOutcome] = useState<RedeemOutcome | null>(null);
@@ -69,15 +72,15 @@ export function useV3Redeem(): UseV3RedeemReturn {
 				const [userOk, globalOk] = limits as [boolean, boolean];
 
 				if (!userOk) {
-					return { kind: "queued", reason: "超过单笔赎回上限" };
+					return { kind: "queued", reason: tRedeem("reasonExceedsPerTx") };
 				}
 				if (!globalOk) {
-					return { kind: "queued", reason: "超过全服当日赎回额度" };
+					return { kind: "queued", reason: tRedeem("reasonExceedsGlobalDaily") };
 				}
 				if (vaultBal < amountWei) {
 					return {
 						kind: "queued",
-						reason: `金库 USDT 不足（当前 ${formatUnits(vaultBal, dec)}）`,
+						reason: tRedeem("reasonVaultInsufficient", { balance: formatUnits(vaultBal, dec) }),
 					};
 				}
 				return { kind: "instant" };
@@ -86,7 +89,7 @@ export function useV3Redeem(): UseV3RedeemReturn {
 				return null;
 			}
 		},
-		[tokenContract, gateContract, usdtContract, tokenAddress, address],
+		[tokenContract, gateContract, usdtContract, tokenAddress, address, tRedeem],
 	);
 
 	const redeem = useCallback(
@@ -95,15 +98,15 @@ export function useV3Redeem(): UseV3RedeemReturn {
 			userBalance?: string,
 		): Promise<RedeemOutcome | null> => {
 			if (!isValidAmount(amount)) {
-				setError("请输入有效的正数金额");
+				setError(t("invalidAmount"));
 				return null;
 			}
 			if (userBalance !== undefined && Number(amount) > Number(userBalance)) {
-				setError("输入金额超过可用余额");
+				setError(t("exceedsBalance"));
 				return null;
 			}
 			if (!tokenAddress || !tokenAbi || !tokenContract) {
-				setError("Token 合约未初始化");
+				setError(t("tokenNotInit"));
 				return null;
 			}
 
@@ -114,7 +117,7 @@ export function useV3Redeem(): UseV3RedeemReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return null;
 				}
 
@@ -177,13 +180,13 @@ export function useV3Redeem(): UseV3RedeemReturn {
 				return outcome;
 			} catch (err) {
 				console.error("V3 redeem failed:", err);
-				setError(getErrorMessage(err, "Redeem 失败，请稍后重试"));
+				setError(getErrorMessage(err, t("redeemFailed")));
 				return null;
 			} finally {
 				setIsRedeeming(false);
 			}
 		},
-		[tokenAddress, tokenAbi, tokenContract, getSigner],
+		[tokenAddress, tokenAbi, tokenContract, getSigner, t],
 	);
 
 	return {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useChainId } from "wagmi";
+import { useTranslations } from "next-intl";
 import {
 	useWalletInfo,
 	useTokenInfo,
@@ -16,6 +17,8 @@ interface TransferPanelProps {
 }
 
 export default function TransferPanel({ onSuccess }: TransferPanelProps) {
+	const t = useTranslations("transferPanel");
+	const tCommon = useTranslations("common");
 	const [recipient, setRecipient] = useState("");
 	const [amount, setAmount] = useState("");
 	const [copied, setCopied] = useState(false);
@@ -97,21 +100,21 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 		<div className="space-y-6">
 			{/* 标题和描述 */}
 			<div className="space-y-1">
-				<h3 className="text-xl font-bold text-white">免费转账</h3>
-				<p className="text-sm text-zinc-400">V2 专属功能 - 零 Gas 费转账</p>
+				<h3 className="text-xl font-bold text-white">{t("title")}</h3>
+				<p className="text-sm text-zinc-400">{t("description")}</p>
 			</div>
 
 			{/* 余额显示 */}
 			<div className="bg-zinc-800/30 rounded-xl p-4 border border-zinc-700/30">
 				<div className="flex items-center justify-between mb-2">
-					<span className="text-sm text-zinc-400">{tokenInfo.name} 余额</span>
+					<span className="text-sm text-zinc-400">{t("balance", { name: tokenInfo.name })}</span>
 					<button
 						type="button"
 						onClick={refreshBalance}
 						disabled={isLoadingBalance || !isConnected}
 						className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors disabled:opacity-50"
 					>
-						{isLoadingBalance ? "刷新中..." : "刷新"}
+						{isLoadingBalance ? tCommon("refreshing") : tCommon("refresh")}
 					</button>
 				</div>
 				<div className="flex items-baseline gap-2">
@@ -136,7 +139,7 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 					htmlFor="recipient-address"
 					className="block text-sm font-medium text-zinc-300"
 				>
-					接收地址
+					{t("recipient")}
 				</label>
 				<input
 					id="recipient-address"
@@ -155,7 +158,7 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 					htmlFor="transfer-amount"
 					className="block text-sm font-medium text-zinc-300"
 				>
-					转账数量
+					{t("amount")}
 				</label>
 				<div className="relative">
 					<input
@@ -176,7 +179,7 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 							disabled={!isConnected || isProcessing}
 							className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							MAX
+							{tCommon("max")}
 						</button>
 						<span className="text-sm text-zinc-400">{tokenInfo.symbol}</span>
 					</div>
@@ -187,19 +190,19 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 			{amount && Number(amount) > 0 && (
 				<div className="bg-zinc-800/30 rounded-lg p-3 border border-zinc-700/30 space-y-2">
 					<div className="flex items-center justify-between text-sm">
-						<span className="text-zinc-400">转账金额</span>
+						<span className="text-zinc-400">{t("amount")}</span>
 						<span className="text-white">
 							{Number(amount).toLocaleString()} {tokenInfo.symbol}
 						</span>
 					</div>
 					<div className="flex items-center justify-between text-sm">
-						<span className="text-zinc-400">手续费</span>
+						<span className="text-zinc-400">{t("fee")}</span>
 						<span className="text-yellow-400">
 							+ {TRANSFER_FEE} {tokenInfo.symbol}
 						</span>
 					</div>
 					<div className="border-t border-zinc-700/50 pt-2 flex items-center justify-between text-sm font-medium">
-						<span className="text-zinc-300">总计扣除</span>
+						<span className="text-zinc-300">{t("total")}</span>
 						<span className="text-white">
 							{(Number(amount) + TRANSFER_FEE).toLocaleString()} {tokenInfo.symbol}
 						</span>
@@ -207,8 +210,10 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 					{/* 余额不足警告 */}
 					{Number(amount) + TRANSFER_FEE > Number(tokenBalance) && (
 						<p className="text-xs text-red-400">
-							余额不足，需要 {(Number(amount) + TRANSFER_FEE).toLocaleString()}{" "}
-							{tokenInfo.symbol}
+							{t("insufficientBalance", {
+								amount: (Number(amount) + TRANSFER_FEE).toLocaleString(),
+								symbol: tokenInfo.symbol,
+							})}
 						</p>
 					)}
 				</div>
@@ -257,12 +262,12 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
 							/>
 						</svg>
-						{step === "signing" && "签名中..."}
-						{step === "verifying" && "验证中..."}
-						{step === "settling" && "转账中..."}
+						{step === "signing" && t("signing")}
+						{step === "verifying" && t("verifying")}
+						{step === "settling" && t("settling")}
 					</span>
 				) : (
-					<span>签名转账 {tokenInfo.symbol}</span>
+					<span>{t("signAndTransfer", { symbol: tokenInfo.symbol })}</span>
 				)}
 			</button>
 
@@ -271,27 +276,27 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 				<div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 space-y-2">
 					<div className="flex items-center justify-between">
 						<h4 className="text-sm font-medium text-green-400">
-							转账成功
+							{t("transferSuccess")}
 						</h4>
 						<button
 							type="button"
 							onClick={resetState}
 							className="text-xs text-zinc-400 hover:text-zinc-300 transition-colors"
 						>
-							关闭
+							{t("close")}
 						</button>
 					</div>
 					{displayTxHash && (
 						<div className="text-xs text-zinc-400">
 							<div className="flex items-center gap-2 flex-wrap">
-								<span className="text-zinc-500">交易哈希:</span>
+								<span className="text-zinc-500">{t("txHash")}</span>
 								{successTxExplorerUrl ? (
 									<a
 										href={successTxExplorerUrl}
 										target="_blank"
 										rel="noopener noreferrer"
 										className="font-mono text-zinc-300 hover:text-indigo-400 underline-offset-2 hover:underline transition-colors"
-										title="在区块浏览器中查看交易"
+										title={t("viewOnExplorer")}
 									>
 										{displayTxHash.slice(0, 10)}...
 										{displayTxHash.slice(-8)}
@@ -306,7 +311,7 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 									type="button"
 									onClick={() => handleCopyHash(displayTxHash)}
 									className="inline-flex items-center gap-1 text-zinc-400 hover:text-white transition-colors"
-									title="复制完整哈希"
+									title={t("copyFullHash")}
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -334,13 +339,13 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 									</svg>
 								</button>
 								{copied && (
-									<span className="text-green-400 text-xs">已复制</span>
+									<span className="text-green-400 text-xs">{tCommon("copied")}</span>
 								)}
 							</div>
 						</div>
 					)}
 					<p className="text-xs text-green-400/80">
-						交易已提交到区块链，请稍候刷新余额查看结果
+						{t("submittedHint")}
 					</p>
 				</div>
 			)}
@@ -350,10 +355,10 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 				<div className="bg-zinc-800/50 border border-zinc-600/50 rounded-xl p-4 space-y-2">
 					<div className="flex items-center justify-between">
 						<h4 className="text-sm font-medium text-yellow-400">
-							{step === "verifying" ? "验证中..." : step === "settling" ? "结算中..." : "签名完成"}
+							{step === "verifying" ? t("debugVerifying") : step === "settling" ? t("debugSettling") : t("debugSigned")}
 						</h4>
 						<span className="text-xs text-zinc-500">
-							已输出到控制台
+							{t("outputToConsole")}
 						</span>
 					</div>
 					<div className="text-xs text-zinc-400 space-y-1">
@@ -378,7 +383,7 @@ export default function TransferPanel({ onSuccess }: TransferPanelProps) {
 
 			{/* 提示信息 */}
 			<p className="text-xs text-center text-zinc-500">
-				V2 合约支持免 Gas 转账，让代币流转更便捷
+				{t("hint")}
 			</p>
 		</div>
 	);

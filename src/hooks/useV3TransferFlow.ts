@@ -1,79 +1,65 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useTransferWithAuth, type TransferAuthPayload } from "./useTransferWithAuth";
-import { useTokenBalance } from "./useTokenBalance";
+import { useV3TransferWithAuth } from "./useV3TransferWithAuth";
+import { useV3TokenBalance } from "./useV3Balance";
 import {
 	verifyPayment,
 	settlePayment,
 	type PaymentRequest,
 } from "@/lib/api";
 import { resolveTransactionHashFromResult } from "@/lib/explorer";
+import type {
+	TransferStep,
+	TransferResult,
+	TransferParams,
+	UseTransferFlowReturn,
+} from "./useTransferFlow";
 import { useTranslations } from "next-intl";
 
-/** 转账流程状态 */
-export type TransferStep = "idle" | "signing" | "verifying" | "settling" | "success" | "error";
-
-/** 转账结果 */
-export interface TransferResult {
-	txHash?: string;
-	/** 来自 EIP-712 domain，用于打开正确的区块浏览器 */
-	chainId?: number;
-	[key: string]: unknown;
-}
-
-/** 转账参数 */
-export interface TransferParams {
-	recipient: string;
-	amount: string;
-}
-
-/** useTransferFlow 返回类型 */
-export interface UseTransferFlowReturn {
-	/** 当前步骤 */
-	step: TransferStep;
-	/** 是否正在处理中 */
-	isProcessing: boolean;
-	/** 错误信息（包括签名错误和 API 错误） */
-	error: string | null;
-	/** 签名 payload（用于调试显示） */
-	payload: TransferAuthPayload | null;
-	/** 转账结果 */
-	txResult: TransferResult | null;
-	/** 执行转账 */
-	executeTransfer: (params: TransferParams) => Promise<boolean>;
-	/** 重置状态 */
-	resetState: () => void;
-	/** 清除错误 */
-	clearError: () => void;
+export interface UseV3TransferFlowReturn extends UseTransferFlowReturn {
+	/** 固定税额（token 单位） */
+	taxAmount: string;
+	/** 预估对方实际到账（扣除固定税后） */
+	estimateReceive: (amount: string) => string | null;
 }
 
 /**
- * 转账流程 Hook
- * 封装完整的签名 -> 验证 -> 结算流程
+ * V3 免 Gas 转账流程
+ * 签名 -> 验证 -> 结算（服务端代付 Gas，走 NEXT_PUBLIC_API_URL）
  */
-export function useTransferFlow(): UseTransferFlowReturn {
+export function useV3TransferFlow(): UseV3TransferFlowReturn {
 	const t = useTranslations("errors");
 	const [step, setStep] = useState<TransferStep>("idle");
 	const [apiError, setApiError] = useState<string | null>(null);
 	const [txResult, setTxResult] = useState<TransferResult | null>(null);
 
-	const { balance: tokenBalance, refresh: refreshBalance } = useTokenBalance();
+	const { balance: tokenBalance, refresh: refreshBalance } = useV3TokenBalance();
 	const {
 		signTransferAuth,
 		payload,
+		taxAmount,
 		error: signError,
 		clearError: clearSignError,
 		clearPayload,
-	} = useTransferWithAuth();
+	} = useV3TransferWithAuth();
 
-	// 是否正在处理中
-	const isProcessing = step === "signing" || step === "verifying" || step === "settling";
+	const isProcessing =
+		step === "signing" || step === "verifying" || step === "settling";
 
-	// 合并错误信息
 	const error = signError || apiError;
 
-	// 重置状态
+	const estimateReceive = useCallback(
+		(amount: string): string | null => {
+			const num = Number(amount);
+			if (!amount || Number.isNaN(num) || num <= 0) return null;
+			const receive = num - Number(taxAmount);
+			if (receive <= 0) return null;
+			return receive.toString();
+		},
+		[taxAmount],
+	);
+
 	const resetState = useCallback(() => {
 		setStep("idle");
 		setApiError(null);
@@ -81,13 +67,11 @@ export function useTransferFlow(): UseTransferFlowReturn {
 		clearPayload();
 	}, [clearPayload]);
 
-	// 清除错误
 	const clearError = useCallback(() => {
 		clearSignError();
 		setApiError(null);
 	}, [clearSignError]);
 
-	// 执行转账流程
 	const executeTransfer = useCallback(
 		async (params: TransferParams): Promise<boolean> => {
 			const { recipient, amount } = params;
@@ -97,27 +81,26 @@ export function useTransferFlow(): UseTransferFlowReturn {
 				return false;
 			}
 
-			// 重置状态
 			resetState();
 			setStep("signing");
 
 			try {
-				// Step 1: 签名
-				const signResult = await signTransferAuth(recipient, amount, tokenBalance);
+				const signResult = await signTransferAuth(
+					recipient,
+					amount,
+					tokenBalance,
+				);
 
 				if (!signResult) {
 					setStep("error");
 					return false;
 				}
 
-				// 构建 API 请求参数（signResult 已包含 domain 和 message）
 				const paymentRequest: PaymentRequest = {
 					domain: signResult.domain,
 					message: signResult.message,
 				};
 
-
-				// Step 2: 验证
 				setStep("verifying");
 				const verifyResult = await verifyPayment(paymentRequest);
 
@@ -127,10 +110,9 @@ export function useTransferFlow(): UseTransferFlowReturn {
 					return false;
 				}
 
-				console.log("=== Verify Result ===");
+				console.log("=== V3 Verify Result ===");
 				console.log(JSON.stringify(verifyResult, null, 2));
 
-				// Step 3: 结算
 				setStep("settling");
 				const settleResult = await settlePayment(paymentRequest);
 
@@ -140,10 +122,9 @@ export function useTransferFlow(): UseTransferFlowReturn {
 					return false;
 				}
 
-				console.log("=== Settle Result ===");
+				console.log("=== V3 Settle Result ===");
 				console.log(JSON.stringify(settleResult, null, 2));
 
-				// 成功：展平嵌套 data，统一 txHash / txid，并带上 chainId 供浏览器链接
 				const raw =
 					settleResult.data &&
 					typeof settleResult.data === "object" &&
@@ -174,13 +155,13 @@ export function useTransferFlow(): UseTransferFlowReturn {
 
 				return true;
 			} catch (err) {
-				console.error("Transfer failed:", err);
+				console.error("V3 transfer failed:", err);
 				setApiError(err instanceof Error ? err.message : t("transferFailed"));
 				setStep("error");
 				return false;
 			}
 		},
-		[signTransferAuth, tokenBalance, refreshBalance, resetState, t]
+		[signTransferAuth, tokenBalance, refreshBalance, resetState, t],
 	);
 
 	return {
@@ -189,6 +170,8 @@ export function useTransferFlow(): UseTransferFlowReturn {
 		error,
 		payload,
 		txResult,
+		taxAmount,
+		estimateReceive,
 		executeTransfer,
 		resetState,
 		clearError,

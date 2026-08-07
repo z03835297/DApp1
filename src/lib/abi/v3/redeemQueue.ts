@@ -1,6 +1,6 @@
 /**
  * V3 RedeemQueue 合约 ABI
- * 来源：Sepolia Etherscan 已验证合约 0x4D2E2395e29CABD14bCdC237266d1f1e4a88a20a
+ * 来源：Sepolia Etherscan 已验证合约 0x6b4329cd8997d24aad37b3d409e12126312cb32e
  * 构造参数：无
  */
 export const REDEEM_QUEUE_ABI = [

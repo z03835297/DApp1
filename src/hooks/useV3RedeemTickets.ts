@@ -12,6 +12,7 @@ import {
 	fetchTicketsFromChain,
 	type V3Ticket,
 } from "@/lib/v3/tickets";
+import { useTranslations } from "next-intl";
 
 export type { V3Ticket };
 
@@ -30,6 +31,7 @@ export interface UseV3RedeemTicketsReturn {
  * 用户自己的赎回票据列表（事件扫描 + getTicket 兜底）
  */
 export function useV3RedeemTickets(): UseV3RedeemTicketsReturn {
+	const t = useTranslations("errors");
 	const [tickets, setTickets] = useState<V3Ticket[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isActing, setIsActing] = useState(false);
@@ -69,11 +71,11 @@ export function useV3RedeemTickets(): UseV3RedeemTicketsReturn {
 			setTickets(results);
 		} catch (err) {
 			console.error("Failed to fetch redeem tickets:", err);
-			setError(getErrorMessage(err, "加载票据失败"));
+			setError(getErrorMessage(err, t("loadTicketsFailed")));
 		} finally {
 			setIsLoading(false);
 		}
-	}, [queueContract, tokenContract, address, isConnected, isReady]);
+	}, [queueContract, tokenContract, address, isConnected, isReady, t]);
 
 	useEffect(() => {
 		refresh();
@@ -82,7 +84,7 @@ export function useV3RedeemTickets(): UseV3RedeemTicketsReturn {
 	const claim = useCallback(
 		async (ticketId: string): Promise<boolean> => {
 			if (!queueAddress || !queueAbi) {
-				setError("RedeemQueue 未初始化");
+				setError(t("queueNotInit"));
 				return false;
 			}
 
@@ -92,7 +94,7 @@ export function useV3RedeemTickets(): UseV3RedeemTicketsReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 				const queue = new Contract(queueAddress, queueAbi, signer);
@@ -102,19 +104,19 @@ export function useV3RedeemTickets(): UseV3RedeemTicketsReturn {
 				return true;
 			} catch (err) {
 				console.error("claim failed:", err);
-				setError(getErrorMessage(err, "Claim 失败"));
+				setError(getErrorMessage(err, t("claimFailed")));
 				return false;
 			} finally {
 				setIsActing(false);
 			}
 		},
-		[queueAddress, queueAbi, getSigner, refresh],
+		[queueAddress, queueAbi, getSigner, refresh, t],
 	);
 
 	const cancel = useCallback(
 		async (ticketId: string): Promise<boolean> => {
 			if (!queueAddress || !queueAbi) {
-				setError("RedeemQueue 未初始化");
+				setError(t("queueNotInit"));
 				return false;
 			}
 
@@ -124,7 +126,7 @@ export function useV3RedeemTickets(): UseV3RedeemTicketsReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 				const queue = new Contract(queueAddress, queueAbi, signer);
@@ -134,13 +136,13 @@ export function useV3RedeemTickets(): UseV3RedeemTicketsReturn {
 				return true;
 			} catch (err) {
 				console.error("cancel failed:", err);
-				setError(getErrorMessage(err, "Cancel 失败"));
+				setError(getErrorMessage(err, t("cancelFailed")));
 				return false;
 			} finally {
 				setIsActing(false);
 			}
 		},
-		[queueAddress, queueAbi, getSigner, refresh],
+		[queueAddress, queueAbi, getSigner, refresh, t],
 	);
 
 	return {

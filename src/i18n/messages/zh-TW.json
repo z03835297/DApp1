@@ -1,0 +1,283 @@
+{
+	"common": {
+		"appName": "BaCi DApp",
+		"refresh": "重新整理",
+		"refreshing": "重新整理中...",
+		"loading": "載入中...",
+		"max": "最大",
+		"confirm": "確定",
+		"close": "關閉",
+		"copied": "已複製"
+	},
+	"nav": {
+		"home": "首頁",
+		"admin": "管理"
+	},
+	"connectButton": {
+		"connectWallet": "連接錢包",
+		"switchNetwork": "切換網路",
+		"test": "測試"
+	},
+	"language": {
+		"label": "語言",
+		"en": "English",
+		"zh-CN": "简体中文",
+		"zh-TW": "繁體中文"
+	},
+	"home": {
+		"title": "代幣操作",
+		"subtitle": "Token + LimitGate + RedeemQueue · Sepolia 測試網"
+	},
+	"adminPage": {
+		"title": "管理後台",
+		"subtitle": "LimitGate 限額設定 · RedeemQueue 審批佇列",
+		"adminAddress": "管理員：{address}",
+		"connectFirst": "請先連接錢包",
+		"checking": "正在校驗管理員身份...",
+		"accessDeniedTitle": "僅管理員可訪問",
+		"accessDeniedDesc": "當前連接錢包不是 Token.admin()。合約層仍會拒絕非管理員寫操作。"
+	},
+	"v1Page": {
+		"title": "代幣操作",
+		"subtitle": "鑄造或提取你的代幣"
+	},
+	"v2Page": {
+		"title": "代幣操作 V2",
+		"subtitle": "免 Gas 轉帳"
+	},
+	"actionPanel": {
+		"tabs": {
+			"mint": "鑄造",
+			"withdraw": "提取",
+			"transfer": "轉帳"
+		},
+		"success": {
+			"closeAria": "關閉彈窗",
+			"iconTitle": "成功",
+			"confirm": "確定",
+			"mint": {
+				"title": "鑄造成功！",
+				"message": "代幣已成功鑄造到你的錢包"
+			},
+			"withdraw": {
+				"title": "提取成功！",
+				"message": "代幣已成功兌換回 USDT"
+			},
+			"transfer": {
+				"title": "轉帳成功！",
+				"message": "代幣已成功轉帳"
+			}
+		}
+	},
+	"mintPanel": {
+		"title": "鑄造代幣",
+		"description": "鑄造新的代幣到你的錢包",
+		"balance": "{name} 餘額",
+		"exchangeable": "可兌換 {name}",
+		"exchangeRate": "1:1 兌換",
+		"amount": "數量",
+		"willReceive": "你將獲得",
+		"approving": "授權中...",
+		"approved": "授權完成",
+		"approve": "授權 {symbol}",
+		"minting": "鑄造中...",
+		"mint": "鑄造 {symbol}",
+		"stepHint": "步驟 1：授權 USDT → 步驟 2：鑄造代幣"
+	},
+	"withdrawPanel": {
+		"title": "提取 {symbol}",
+		"description": "將代幣兌換回 {symbol}",
+		"balance": "{name} 餘額",
+		"exchangeable": "可兌換 {name}",
+		"exchangeRate": "1:1 兌換",
+		"amount": "數量",
+		"willReceive": "你將獲得",
+		"withdrawing": "提取中...",
+		"withdraw": "提取 {symbol}",
+		"hint": "將 {tokenSymbol} 兌換回 {usdtSymbol}，無需授權"
+	},
+	"transferPanel": {
+		"title": "免費轉帳",
+		"description": "V2 專屬功能 - 零 Gas 費轉帳",
+		"balance": "{name} 餘額",
+		"recipient": "接收地址",
+		"amount": "轉帳數量",
+		"fee": "手續費",
+		"total": "總計扣除",
+		"insufficientBalance": "餘額不足，需要 {amount} {symbol}",
+		"signing": "簽名中...",
+		"verifying": "驗證中...",
+		"settling": "轉帳中...",
+		"signAndTransfer": "簽名轉帳 {symbol}",
+		"transferSuccess": "轉帳成功",
+		"close": "關閉",
+		"txHash": "交易雜湊：",
+		"viewOnExplorer": "在區塊瀏覽器中查看交易",
+		"copyFullHash": "複製完整雜湊",
+		"submittedHint": "交易已提交到區塊鏈，請稍候重新整理餘額查看結果",
+		"debugVerifying": "驗證中...",
+		"debugSettling": "結算中...",
+		"debugSigned": "簽名完成",
+		"outputToConsole": "已輸出到控制台",
+		"hint": "V2 合約支援免 Gas 轉帳，讓代幣流轉更便捷"
+	},
+	"v3": {
+		"actionPanel": {
+			"tabs": {
+				"mint": "鑄造",
+				"transfer": "轉帳",
+				"redeem": "贖回",
+				"tickets": "票據"
+			},
+			"closeAria": "關閉彈窗",
+			"confirm": "確定",
+			"confirmedHint": "交易已確認，請重新整理餘額查看結果",
+			"success": {
+				"mint": "鑄造成功！",
+				"transfer": "轉帳成功！",
+				"redeem": "贖回已提交！",
+				"tickets": "操作成功！"
+			}
+		},
+		"mintPanel": {
+			"title": "鑄造代幣",
+			"description": "存入 USDT，1:1 鑄造 Token（授權 → 鑄造）",
+			"balance": "{name} 餘額",
+			"amount": "數量",
+			"approving": "授權中...",
+			"approved": "授權完成",
+			"approve": "授權 {symbol}",
+			"minting": "鑄造中...",
+			"mint": "鑄造 {symbol}",
+			"stepHint": "步驟 1：授權 USDT 給 Token → 步驟 2：Token.mint"
+		},
+		"transferPanel": {
+			"title": "免費轉帳",
+			"description": "零 Gas 費轉帳（僅簽名，伺服器端代付）；使用者間轉帳可能扣固定稅",
+			"balance": "{name} 餘額",
+			"taxNotice": "固定稅：{tax} {symbol}（轉帳額須嚴格大於稅額）",
+			"recipient": "接收地址",
+			"amount": "轉帳數量",
+			"sendAmount": "轉出",
+			"tax": "固定稅",
+			"estimatedReceive": "對方預估到帳",
+			"amountMustExceedTax": "金額須大於稅額",
+			"signing": "簽名中...",
+			"verifying": "驗證中...",
+			"settling": "轉帳中...",
+			"signAndTransfer": "簽名轉帳 {symbol}",
+			"transferSuccess": "轉帳成功",
+			"close": "關閉",
+			"txHash": "交易雜湊：",
+			"viewOnExplorer": "在區塊瀏覽器中查看交易",
+			"copyFullHash": "複製完整雜湊",
+			"submittedHint": "交易已提交到區塊鏈，請稍候重新整理餘額查看結果",
+			"debugVerifying": "驗證中...",
+			"debugSettling": "結算中...",
+			"debugSigned": "簽名完成",
+			"outputToConsole": "已輸出到控制台",
+			"hint": "V3 合約支援免 Gas 轉帳，僅需錢包簽名即可完成"
+		},
+		"redeemPanel": {
+			"title": "贖回",
+			"description": "贖回 Token 換回 USDT；額度內且金庫足夠則即時，否則入隊",
+			"balance": "{name} 餘額",
+			"perTxLimit": "單筆上限",
+			"dailyUsed": "日額度已用 / 上限",
+			"vaultBalance": "金庫 USDT",
+			"paused": "暫停",
+			"pausedYes": "已暫停",
+			"pausedNo": "正常",
+			"amount": "數量",
+			"previewInstant": "預計即時贖回：燒幣並收到等量 {symbol}",
+			"previewQueued": "預計入隊：{reason}。Token 將鎖入佇列，待管理員批准後領取。",
+			"previewPaused": "合約已暫停，無法贖回",
+			"outcomeInstant": "即時贖回成功",
+			"outcomeQueued": "已入隊，票據 #{ticketId}（可在票據頁查看）",
+			"outcomeUnknown": "交易已確認，請重新整理票據確認結果",
+			"reasonExceedsPerTx": "超過單筆贖回上限",
+			"reasonExceedsGlobalDaily": "超過全服當日贖回額度",
+			"reasonVaultInsufficient": "金庫 USDT 不足（當前 {balance}）",
+			"redeeming": "贖回中...",
+			"redeem": "贖回 {symbol}"
+		},
+		"ticketList": {
+			"title": "票據",
+			"description": "查看排隊票據；已批准可領取，待處理/已批准可取消",
+			"loading": "載入中...",
+			"loadingTickets": "載入票據中...",
+			"empty": "暫無贖回票據",
+			"amount": "金額：{amount}",
+			"claim": "領取",
+			"cancel": "取消"
+		},
+		"adminLimitsPanel": {
+			"title": "LimitGate 限額",
+			"description": "在 LimitGate 合約上設定單筆 / 全服日贖回上限",
+			"perTxLimit": "單筆上限",
+			"dailyLimit": "日上限",
+			"usedToday": "今日已用",
+			"setPerTxLabel": "設定單筆上限",
+			"setDailyLabel": "設定日上限",
+			"update": "更新",
+			"perTxUpdated": "單筆上限已更新",
+			"dailyUpdated": "日上限已更新"
+		},
+		"adminQueuePanel": {
+			"title": "審批佇列",
+			"description": "待處理票據可批准 / 拒絕（當前待處理：{count}）",
+			"loading": "載入中...",
+			"loadingQueue": "載入佇列中...",
+			"empty": "暫無票據",
+			"amount": "金額：{amount}",
+			"owner": "所有者：{address}",
+			"approve": "批准",
+			"reject": "拒絕"
+		}
+	},
+	"ticketStatus": {
+		"None": "無",
+		"Pending": "待處理",
+		"Approved": "已批准",
+		"Claimed": "已領取",
+		"Cancelled": "已取消",
+		"Rejected": "已拒絕"
+	},
+	"errors": {
+		"invalidAmount": "請輸入有效的正數金額",
+		"exceedsBalance": "輸入金額超過可用餘額",
+		"contractNotInit": "合約未初始化",
+		"vaultNotInit": "Vault 合約未初始化",
+		"tokenNotInit": "Token 合約未初始化",
+		"gateNotInit": "LimitGate 未初始化",
+		"queueNotInit": "RedeemQueue 未初始化",
+		"noSigner": "無法獲取簽名器，請確保錢包已連接",
+		"approveFailed": "授權失敗，請稍後重試",
+		"mintFailed": "鑄造失敗，請稍後重試",
+		"withdrawFailed": "提取失敗，請稍後重試",
+		"redeemFailed": "贖回失敗，請稍後重試",
+		"transferFailed": "轉帳失敗",
+		"transferFailedRetry": "轉帳失敗，請稍後重試",
+		"approveStepRequired": "請先完成授權（步驟 1）",
+		"amountMismatch": "金額與授權金額不一致，請重新授權",
+		"allowanceInsufficient": "鏈上授權額度不足，請重新授權",
+		"fillRecipientAndAmount": "請填寫接收地址和金額",
+		"verifyFailed": "驗證失敗",
+		"settleFailed": "結算失敗",
+		"connectWalletFirst": "請先連接錢包",
+		"userRejectedSign": "使用者取消簽名",
+		"signFailed": "簽名失敗，請稍後重試",
+		"invalidAddress": "請輸入有效的錢包地址",
+		"insufficientBalanceFee": "餘額不足（需要額外 {fee} token 手續費）",
+		"invalidLimit": "請輸入有效的限額（可為 0）",
+		"setPerTxFailed": "設定單筆上限失敗",
+		"setDailyFailed": "設定日上限失敗",
+		"loadTicketsFailed": "載入票據失敗",
+		"claimFailed": "領取失敗",
+		"cancelFailed": "取消失敗",
+		"loadQueueFailed": "載入審批佇列失敗",
+		"approveTicketFailed": "批准失敗",
+		"rejectTicketFailed": "拒絕失敗",
+		"amountMustExceedTax": "轉帳金額必須嚴格大於固定稅 {tax}"
+	}
+}

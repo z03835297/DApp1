@@ -1,0 +1,283 @@
+{
+	"common": {
+		"appName": "BaCi DApp",
+		"refresh": "Refresh",
+		"refreshing": "Refreshing...",
+		"loading": "Loading...",
+		"max": "MAX",
+		"confirm": "Confirm",
+		"close": "Close",
+		"copied": "Copied"
+	},
+	"nav": {
+		"home": "Home",
+		"admin": "Admin"
+	},
+	"connectButton": {
+		"connectWallet": "Connect Wallet",
+		"switchNetwork": "Switch Network",
+		"test": "Test"
+	},
+	"language": {
+		"label": "Language",
+		"en": "English",
+		"zh-CN": "简体中文",
+		"zh-TW": "繁體中文"
+	},
+	"home": {
+		"title": "Token Operations",
+		"subtitle": "Token + LimitGate + RedeemQueue · Sepolia Testnet"
+	},
+	"adminPage": {
+		"title": "Admin",
+		"subtitle": "LimitGate Limits · RedeemQueue Approval Queue",
+		"adminAddress": "admin: {address}",
+		"connectFirst": "Please connect your wallet first",
+		"checking": "Verifying admin identity...",
+		"accessDeniedTitle": "Admins only",
+		"accessDeniedDesc": "The connected wallet is not Token.admin(). The contract layer will still reject non-admin write operations."
+	},
+	"v1Page": {
+		"title": "Token Operations",
+		"subtitle": "Mint or withdraw your tokens"
+	},
+	"v2Page": {
+		"title": "Token Operations V2",
+		"subtitle": "Gas-free transfers"
+	},
+	"actionPanel": {
+		"tabs": {
+			"mint": "Mint",
+			"withdraw": "Withdraw",
+			"transfer": "Transfer"
+		},
+		"success": {
+			"closeAria": "Close dialog",
+			"iconTitle": "Success",
+			"confirm": "Confirm",
+			"mint": {
+				"title": "Mint successful!",
+				"message": "Tokens have been minted to your wallet"
+			},
+			"withdraw": {
+				"title": "Withdraw successful!",
+				"message": "Tokens have been exchanged back to USDT"
+			},
+			"transfer": {
+				"title": "Transfer successful!",
+				"message": "Tokens have been transferred successfully"
+			}
+		}
+	},
+	"mintPanel": {
+		"title": "Mint Tokens",
+		"description": "Mint new tokens to your wallet",
+		"balance": "{name} Balance",
+		"exchangeable": "Exchangeable {name}",
+		"exchangeRate": "1:1 exchange",
+		"amount": "Amount",
+		"willReceive": "You will receive",
+		"approving": "Approving...",
+		"approved": "Approved",
+		"approve": "Approve {symbol}",
+		"minting": "Minting...",
+		"mint": "Mint {symbol}",
+		"stepHint": "Step 1: Approve USDT → Step 2: Mint Token"
+	},
+	"withdrawPanel": {
+		"title": "Withdraw {symbol}",
+		"description": "Exchange tokens back to {symbol}",
+		"balance": "{name} Balance",
+		"exchangeable": "Exchangeable {name}",
+		"exchangeRate": "1:1 exchange",
+		"amount": "Amount",
+		"willReceive": "You will receive",
+		"withdrawing": "Withdrawing...",
+		"withdraw": "Withdraw {symbol}",
+		"hint": "Exchange {tokenSymbol} back to {usdtSymbol}, no approval required"
+	},
+	"transferPanel": {
+		"title": "Free Transfer",
+		"description": "V2 exclusive feature - zero gas fee transfer",
+		"balance": "{name} Balance",
+		"recipient": "Recipient Address",
+		"amount": "Transfer Amount",
+		"fee": "Fee",
+		"total": "Total Deducted",
+		"insufficientBalance": "Insufficient balance, need {amount} {symbol}",
+		"signing": "Signing...",
+		"verifying": "Verifying...",
+		"settling": "Settling...",
+		"signAndTransfer": "Sign & Transfer {symbol}",
+		"transferSuccess": "Transfer successful",
+		"close": "Close",
+		"txHash": "Tx Hash:",
+		"viewOnExplorer": "View transaction on block explorer",
+		"copyFullHash": "Copy full hash",
+		"submittedHint": "Transaction submitted to blockchain, please refresh balance shortly to see the result",
+		"debugVerifying": "Verifying...",
+		"debugSettling": "Settling...",
+		"debugSigned": "Signature complete",
+		"outputToConsole": "Output to console",
+		"hint": "The V2 contract supports gas-free transfers for smoother token flow"
+	},
+	"v3": {
+		"actionPanel": {
+			"tabs": {
+				"mint": "Mint",
+				"transfer": "Transfer",
+				"redeem": "Redeem",
+				"tickets": "Tickets"
+			},
+			"closeAria": "Close dialog",
+			"confirm": "Confirm",
+			"confirmedHint": "Transaction confirmed, please refresh balance to see the result",
+			"success": {
+				"mint": "Mint successful!",
+				"transfer": "Transfer successful!",
+				"redeem": "Redeem submitted!",
+				"tickets": "Action successful!"
+			}
+		},
+		"mintPanel": {
+			"title": "Mint Tokens",
+			"description": "Deposit USDT, mint Token 1:1 (approve → mint)",
+			"balance": "{name} Balance",
+			"amount": "Amount",
+			"approving": "Approving...",
+			"approved": "Approved",
+			"approve": "Approve {symbol}",
+			"minting": "Minting...",
+			"mint": "Mint {symbol}",
+			"stepHint": "Step 1: Approve USDT to Token → Step 2: Token.mint"
+		},
+		"transferPanel": {
+			"title": "Free Transfer",
+			"description": "Zero gas fee transfer (sign only, server pays gas); a fixed tax may apply between users",
+			"balance": "{name} Balance",
+			"taxNotice": "Fixed tax: {tax} {symbol} (transfer amount must strictly exceed the tax)",
+			"recipient": "Recipient Address",
+			"amount": "Transfer Amount",
+			"sendAmount": "Send",
+			"tax": "Fixed Tax",
+			"estimatedReceive": "Recipient will receive (est.)",
+			"amountMustExceedTax": "Amount must exceed tax",
+			"signing": "Signing...",
+			"verifying": "Verifying...",
+			"settling": "Transferring...",
+			"signAndTransfer": "Sign & Transfer {symbol}",
+			"transferSuccess": "Transfer successful",
+			"close": "Close",
+			"txHash": "Tx Hash:",
+			"viewOnExplorer": "View transaction on block explorer",
+			"copyFullHash": "Copy full hash",
+			"submittedHint": "Transaction submitted to blockchain, please refresh balance shortly to see the result",
+			"debugVerifying": "Verifying...",
+			"debugSettling": "Settling...",
+			"debugSigned": "Signature complete",
+			"outputToConsole": "Output to console",
+			"hint": "The V3 contract supports gas-free transfers with just a wallet signature"
+		},
+		"redeemPanel": {
+			"title": "Redeem",
+			"description": "Redeem Token back to USDT; instant if within limits and the vault has funds, otherwise queued",
+			"balance": "{name} Balance",
+			"perTxLimit": "Per-tx Limit",
+			"dailyUsed": "Daily Used / Limit",
+			"vaultBalance": "Vault USDT",
+			"paused": "Paused",
+			"pausedYes": "Paused",
+			"pausedNo": "Normal",
+			"amount": "Amount",
+			"previewInstant": "Instant redeem expected: burn and receive equivalent {symbol}",
+			"previewQueued": "Expected to be queued: {reason}. Token will be locked in the queue until approved by an admin.",
+			"previewPaused": "The contract is paused, redeem is unavailable",
+			"outcomeInstant": "Instant redeem successful",
+			"outcomeQueued": "Queued, ticket #{ticketId} (view in Tickets)",
+			"outcomeUnknown": "Transaction confirmed, please refresh Tickets to confirm the result",
+			"reasonExceedsPerTx": "Exceeds per-tx redeem limit",
+			"reasonExceedsGlobalDaily": "Exceeds global daily redeem quota",
+			"reasonVaultInsufficient": "Insufficient vault USDT (current {balance})",
+			"redeeming": "Redeeming...",
+			"redeem": "Redeem {symbol}"
+		},
+		"ticketList": {
+			"title": "Tickets",
+			"description": "View queued tickets; Approved tickets can be claimed, Pending/Approved tickets can be cancelled",
+			"loading": "Loading...",
+			"loadingTickets": "Loading tickets...",
+			"empty": "No redeem tickets yet",
+			"amount": "Amount: {amount}",
+			"claim": "Claim",
+			"cancel": "Cancel"
+		},
+		"adminLimitsPanel": {
+			"title": "LimitGate Limits",
+			"description": "Set per-tx / global daily redeem limits on the LimitGate contract",
+			"perTxLimit": "Per-tx Limit",
+			"dailyLimit": "Daily Limit",
+			"usedToday": "Used Today",
+			"setPerTxLabel": "Set per-tx limit",
+			"setDailyLabel": "Set daily limit",
+			"update": "Update",
+			"perTxUpdated": "Per-tx limit updated",
+			"dailyUpdated": "Daily limit updated"
+		},
+		"adminQueuePanel": {
+			"title": "Approval Queue",
+			"description": "Pending tickets can be approved / rejected (currently pending: {count})",
+			"loading": "Loading...",
+			"loadingQueue": "Loading queue...",
+			"empty": "No tickets yet",
+			"amount": "Amount: {amount}",
+			"owner": "Owner: {address}",
+			"approve": "Approve",
+			"reject": "Reject"
+		}
+	},
+	"ticketStatus": {
+		"None": "None",
+		"Pending": "Pending",
+		"Approved": "Approved",
+		"Claimed": "Claimed",
+		"Cancelled": "Cancelled",
+		"Rejected": "Rejected"
+	},
+	"errors": {
+		"invalidAmount": "Please enter a valid positive amount",
+		"exceedsBalance": "The amount entered exceeds the available balance",
+		"contractNotInit": "Contract not initialized",
+		"vaultNotInit": "Vault contract not initialized",
+		"tokenNotInit": "Token contract not initialized",
+		"gateNotInit": "LimitGate not initialized",
+		"queueNotInit": "RedeemQueue not initialized",
+		"noSigner": "Unable to get signer, please make sure your wallet is connected",
+		"approveFailed": "Approval failed, please try again later",
+		"mintFailed": "Mint failed, please try again later",
+		"withdrawFailed": "Withdraw failed, please try again later",
+		"redeemFailed": "Redeem failed, please try again later",
+		"transferFailed": "Transfer failed",
+		"transferFailedRetry": "Transfer failed, please try again later",
+		"approveStepRequired": "Please complete approval first (Step 1)",
+		"amountMismatch": "Amount does not match the approved amount, please re-approve",
+		"allowanceInsufficient": "On-chain allowance is insufficient, please re-approve",
+		"fillRecipientAndAmount": "Please fill in the recipient address and amount",
+		"verifyFailed": "Verification failed",
+		"settleFailed": "Settlement failed",
+		"connectWalletFirst": "Please connect your wallet first",
+		"userRejectedSign": "Signature cancelled by user",
+		"signFailed": "Signing failed, please try again later",
+		"invalidAddress": "Please enter a valid wallet address",
+		"insufficientBalanceFee": "Insufficient balance (an additional {fee} token fee is required)",
+		"invalidLimit": "Please enter a valid limit (0 is allowed)",
+		"setPerTxFailed": "Failed to set per-tx limit",
+		"setDailyFailed": "Failed to set daily limit",
+		"loadTicketsFailed": "Failed to load tickets",
+		"claimFailed": "Claim failed",
+		"cancelFailed": "Cancel failed",
+		"loadQueueFailed": "Failed to load approval queue",
+		"approveTicketFailed": "Approve failed",
+		"rejectTicketFailed": "Reject failed",
+		"amountMustExceedTax": "Transfer amount must strictly exceed the fixed tax {tax}"
+	}
+}

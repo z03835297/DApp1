@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { parseUnits } from "ethers";
 import { useWalletInfo } from "./useWalletInfo";
 import { useTokenContract } from "./useContract";
+import { useTranslations } from "next-intl";
 
 export interface UseTransferReturn {
 	/** Token 精度 */
@@ -77,6 +78,7 @@ function getErrorMessage(err: unknown, defaultMsg: string): string {
  * 调用 Token 合约的 transfer 函数，进行代币转账
  */
 export function useTransfer(): UseTransferReturn {
+	const t = useTranslations("errors");
 	const [decimals, setDecimals] = useState<number>(6);
 	const [isTransferring, setIsTransferring] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -115,24 +117,24 @@ export function useTransfer(): UseTransferReturn {
 		): Promise<boolean> => {
 			// 地址验证
 			if (!isValidAddress(recipient)) {
-				setError("请输入有效的钱包地址");
+				setError(t("invalidAddress"));
 				return false;
 			}
 
 			// 输入验证
 			if (!isValidAmount(amount)) {
-				setError("请输入有效的正数金额");
+				setError(t("invalidAmount"));
 				return false;
 			}
 
 			// 余额验证（如果提供了余额）
 			if (userBalance !== undefined && Number(amount) > Number(userBalance)) {
-				setError("输入金额超过可用余额");
+				setError(t("exceedsBalance"));
 				return false;
 			}
 
 			if (!tokenAddress || !tokenAbi) {
-				setError("Token 合约未初始化");
+				setError(t("tokenNotInit"));
 				return false;
 			}
 
@@ -142,7 +144,7 @@ export function useTransfer(): UseTransferReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 
@@ -164,13 +166,13 @@ export function useTransfer(): UseTransferReturn {
 				return true;
 			} catch (err) {
 				console.error("Transfer failed:", err);
-				setError(getErrorMessage(err, "转账失败，请稍后重试"));
+				setError(getErrorMessage(err, t("transferFailedRetry")));
 				return false;
 			} finally {
 				setIsTransferring(false);
 			}
 		},
-		[tokenAddress, tokenAbi, getSigner, fetchDecimals],
+		[tokenAddress, tokenAbi, getSigner, fetchDecimals, t],
 	);
 
 	return {

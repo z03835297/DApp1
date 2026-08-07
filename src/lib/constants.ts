@@ -64,11 +64,11 @@ export const ABI: Record<
 };
 
 // ============ V3（Token + LimitGate + RedeemQueue 三合约架构）============
-// v3 目前只部署在 Sepolia 测试网，合约集合与 v1/v2 不同，单独维护地址与 ABI 查表，
+// v3 已部署在 Mainnet 与 Sepolia；合约集合与 v1/v2 不同，单独维护地址与 ABI 查表，
 // 不复用 CONTRACT_ADDRESS / ABI（避免为 v1/v2 引入不存在的字段）。
 
 /**
- * V3 合约地址 - 按链区分（目前只有 Sepolia 有数据）
+ * V3 合约地址 - 按链区分
  * 数据来源同样是 `contracts.json` 的 `v3` 字段。
  */
 export const V3_CONTRACT_ADDRESS: Partial<Record<ChainId, V3ContractAddressType>> =
@@ -81,10 +81,18 @@ export const V3_CONTRACT_ADDRESS: Partial<Record<ChainId, V3ContractAddressType>
 			]),
 	);
 
-/** V3 合约 ABI（USDT 复用 Sepolia 上的 mUSDT ABI，因为 v3 目前只部署在 Sepolia） */
-export const V3_ABI: Record<V3ContractName, object[]> = {
+/** V3 核心合约 ABI（Token / LimitGate / RedeemQueue） */
+export const V3_ABI: Record<
+	Exclude<V3ContractName, V3ContractName.USDT>,
+	object[]
+> = {
 	[V3ContractName.TOKEN]: v3.TOKEN_ABI,
 	[V3ContractName.LIMIT_GATE]: v3.LIMIT_GATE_ABI,
 	[V3ContractName.REDEEM_QUEUE]: v3.REDEEM_QUEUE_ABI,
-	[V3ContractName.USDT]: MUSDT_ABI,
+};
+
+/** V3 USDT ABI：Mainnet 用真实 USDT，Sepolia 用 mUSDT */
+export const V3_USDT_ABI: Record<ChainId, object[]> = {
+	[ChainId.MAINNET]: USDT_ABI,
+	[ChainId.SEPOLIA]: MUSDT_ABI,
 };

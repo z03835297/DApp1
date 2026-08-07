@@ -1,0 +1,283 @@
+{
+	"common": {
+		"appName": "BaCi DApp",
+		"refresh": "刷新",
+		"refreshing": "刷新中...",
+		"loading": "加载中...",
+		"max": "最大",
+		"confirm": "确定",
+		"close": "关闭",
+		"copied": "已复制"
+	},
+	"nav": {
+		"home": "首页",
+		"admin": "管理"
+	},
+	"connectButton": {
+		"connectWallet": "连接钱包",
+		"switchNetwork": "切换网络",
+		"test": "测试"
+	},
+	"language": {
+		"label": "语言",
+		"en": "English",
+		"zh-CN": "简体中文",
+		"zh-TW": "繁體中文"
+	},
+	"home": {
+		"title": "代币操作",
+		"subtitle": "Token + LimitGate + RedeemQueue · Sepolia 测试网"
+	},
+	"adminPage": {
+		"title": "管理后台",
+		"subtitle": "LimitGate 限额设置 · RedeemQueue 审批队列",
+		"adminAddress": "管理员：{address}",
+		"connectFirst": "请先连接钱包",
+		"checking": "正在校验管理员身份...",
+		"accessDeniedTitle": "仅管理员可访问",
+		"accessDeniedDesc": "当前连接钱包不是 Token.admin()。合约层仍会拒绝非管理员写操作。"
+	},
+	"v1Page": {
+		"title": "代币操作",
+		"subtitle": "铸造或提取你的代币"
+	},
+	"v2Page": {
+		"title": "代币操作 V2",
+		"subtitle": "免 Gas 转账"
+	},
+	"actionPanel": {
+		"tabs": {
+			"mint": "铸造",
+			"withdraw": "提取",
+			"transfer": "转账"
+		},
+		"success": {
+			"closeAria": "关闭弹窗",
+			"iconTitle": "成功",
+			"confirm": "确定",
+			"mint": {
+				"title": "铸造成功！",
+				"message": "代币已成功铸造到你的钱包"
+			},
+			"withdraw": {
+				"title": "提取成功！",
+				"message": "代币已成功兑换回 USDT"
+			},
+			"transfer": {
+				"title": "转账成功！",
+				"message": "代币已成功转账"
+			}
+		}
+	},
+	"mintPanel": {
+		"title": "铸造代币",
+		"description": "铸造新的代币到你的钱包",
+		"balance": "{name} 余额",
+		"exchangeable": "可兑换 {name}",
+		"exchangeRate": "1:1 兑换",
+		"amount": "数量",
+		"willReceive": "你将获得",
+		"approving": "授权中...",
+		"approved": "授权完成",
+		"approve": "授权 {symbol}",
+		"minting": "铸造中...",
+		"mint": "铸造 {symbol}",
+		"stepHint": "步骤 1：授权 USDT → 步骤 2：铸造代币"
+	},
+	"withdrawPanel": {
+		"title": "提取 {symbol}",
+		"description": "将代币兑换回 {symbol}",
+		"balance": "{name} 余额",
+		"exchangeable": "可兑换 {name}",
+		"exchangeRate": "1:1 兑换",
+		"amount": "数量",
+		"willReceive": "你将获得",
+		"withdrawing": "提取中...",
+		"withdraw": "提取 {symbol}",
+		"hint": "将 {tokenSymbol} 兑换回 {usdtSymbol}，无需授权"
+	},
+	"transferPanel": {
+		"title": "免费转账",
+		"description": "V2 专属功能 - 零 Gas 费转账",
+		"balance": "{name} 余额",
+		"recipient": "接收地址",
+		"amount": "转账数量",
+		"fee": "手续费",
+		"total": "总计扣除",
+		"insufficientBalance": "余额不足，需要 {amount} {symbol}",
+		"signing": "签名中...",
+		"verifying": "验证中...",
+		"settling": "转账中...",
+		"signAndTransfer": "签名转账 {symbol}",
+		"transferSuccess": "转账成功",
+		"close": "关闭",
+		"txHash": "交易哈希：",
+		"viewOnExplorer": "在区块浏览器中查看交易",
+		"copyFullHash": "复制完整哈希",
+		"submittedHint": "交易已提交到区块链，请稍候刷新余额查看结果",
+		"debugVerifying": "验证中...",
+		"debugSettling": "结算中...",
+		"debugSigned": "签名完成",
+		"outputToConsole": "已输出到控制台",
+		"hint": "V2 合约支持免 Gas 转账，让代币流转更便捷"
+	},
+	"v3": {
+		"actionPanel": {
+			"tabs": {
+				"mint": "铸造",
+				"transfer": "转账",
+				"redeem": "赎回",
+				"tickets": "票据"
+			},
+			"closeAria": "关闭弹窗",
+			"confirm": "确定",
+			"confirmedHint": "交易已确认，请刷新余额查看结果",
+			"success": {
+				"mint": "铸造成功！",
+				"transfer": "转账成功！",
+				"redeem": "赎回已提交！",
+				"tickets": "操作成功！"
+			}
+		},
+		"mintPanel": {
+			"title": "铸造代币",
+			"description": "存入 USDT，1:1 铸造 Token（授权 → 铸造）",
+			"balance": "{name} 余额",
+			"amount": "数量",
+			"approving": "授权中...",
+			"approved": "授权完成",
+			"approve": "授权 {symbol}",
+			"minting": "铸造中...",
+			"mint": "铸造 {symbol}",
+			"stepHint": "步骤 1：授权 USDT 给 Token → 步骤 2：Token.mint"
+		},
+		"transferPanel": {
+			"title": "免费转账",
+			"description": "零 Gas 费转账（仅签名，服务端代付）；用户间转账可能扣固定税",
+			"balance": "{name} 余额",
+			"taxNotice": "固定税：{tax} {symbol}（转账额须严格大于税额）",
+			"recipient": "接收地址",
+			"amount": "转账数量",
+			"sendAmount": "转出",
+			"tax": "固定税",
+			"estimatedReceive": "对方预估到账",
+			"amountMustExceedTax": "金额须大于税额",
+			"signing": "签名中...",
+			"verifying": "验证中...",
+			"settling": "转账中...",
+			"signAndTransfer": "签名转账 {symbol}",
+			"transferSuccess": "转账成功",
+			"close": "关闭",
+			"txHash": "交易哈希：",
+			"viewOnExplorer": "在区块浏览器中查看交易",
+			"copyFullHash": "复制完整哈希",
+			"submittedHint": "交易已提交到区块链，请稍候刷新余额查看结果",
+			"debugVerifying": "验证中...",
+			"debugSettling": "结算中...",
+			"debugSigned": "签名完成",
+			"outputToConsole": "已输出到控制台",
+			"hint": "V3 合约支持免 Gas 转账，仅需钱包签名即可完成"
+		},
+		"redeemPanel": {
+			"title": "赎回",
+			"description": "赎回 Token 换回 USDT；额度内且金库够则即时，否则入队",
+			"balance": "{name} 余额",
+			"perTxLimit": "单笔上限",
+			"dailyUsed": "日额度已用 / 上限",
+			"vaultBalance": "金库 USDT",
+			"paused": "暂停",
+			"pausedYes": "已暂停",
+			"pausedNo": "正常",
+			"amount": "数量",
+			"previewInstant": "预计即时赎回：烧币并收到等量 {symbol}",
+			"previewQueued": "预计入队：{reason}。Token 将锁入队列，待管理员批准后领取。",
+			"previewPaused": "合约已暂停，无法赎回",
+			"outcomeInstant": "即时赎回成功",
+			"outcomeQueued": "已入队，票据 #{ticketId}（可在票据页查看）",
+			"outcomeUnknown": "交易已确认，请刷新票据确认结果",
+			"reasonExceedsPerTx": "超过单笔赎回上限",
+			"reasonExceedsGlobalDaily": "超过全服当日赎回额度",
+			"reasonVaultInsufficient": "金库 USDT 不足（当前 {balance}）",
+			"redeeming": "赎回中...",
+			"redeem": "赎回 {symbol}"
+		},
+		"ticketList": {
+			"title": "票据",
+			"description": "查看排队票据；已批准可领取，待处理/已批准可取消",
+			"loading": "加载中...",
+			"loadingTickets": "加载票据中...",
+			"empty": "暂无赎回票据",
+			"amount": "金额：{amount}",
+			"claim": "领取",
+			"cancel": "取消"
+		},
+		"adminLimitsPanel": {
+			"title": "LimitGate 限额",
+			"description": "在 LimitGate 合约上设置单笔 / 全服日赎回上限",
+			"perTxLimit": "单笔上限",
+			"dailyLimit": "日上限",
+			"usedToday": "今日已用",
+			"setPerTxLabel": "设置单笔上限",
+			"setDailyLabel": "设置日上限",
+			"update": "更新",
+			"perTxUpdated": "单笔上限已更新",
+			"dailyUpdated": "日上限已更新"
+		},
+		"adminQueuePanel": {
+			"title": "审批队列",
+			"description": "待处理票据可批准 / 拒绝（当前待处理：{count}）",
+			"loading": "加载中...",
+			"loadingQueue": "加载队列中...",
+			"empty": "暂无票据",
+			"amount": "金额：{amount}",
+			"owner": "所有者：{address}",
+			"approve": "批准",
+			"reject": "拒绝"
+		}
+	},
+	"ticketStatus": {
+		"None": "无",
+		"Pending": "待处理",
+		"Approved": "已批准",
+		"Claimed": "已领取",
+		"Cancelled": "已取消",
+		"Rejected": "已拒绝"
+	},
+	"errors": {
+		"invalidAmount": "请输入有效的正数金额",
+		"exceedsBalance": "输入金额超过可用余额",
+		"contractNotInit": "合约未初始化",
+		"vaultNotInit": "Vault 合约未初始化",
+		"tokenNotInit": "Token 合约未初始化",
+		"gateNotInit": "LimitGate 未初始化",
+		"queueNotInit": "RedeemQueue 未初始化",
+		"noSigner": "无法获取签名器，请确保钱包已连接",
+		"approveFailed": "授权失败，请稍后重试",
+		"mintFailed": "铸造失败，请稍后重试",
+		"withdrawFailed": "提取失败，请稍后重试",
+		"redeemFailed": "赎回失败，请稍后重试",
+		"transferFailed": "转账失败",
+		"transferFailedRetry": "转账失败，请稍后重试",
+		"approveStepRequired": "请先完成授权（步骤 1）",
+		"amountMismatch": "金额与授权金额不一致，请重新授权",
+		"allowanceInsufficient": "链上授权额度不足，请重新授权",
+		"fillRecipientAndAmount": "请填写接收地址和金额",
+		"verifyFailed": "验证失败",
+		"settleFailed": "结算失败",
+		"connectWalletFirst": "请先连接钱包",
+		"userRejectedSign": "用户取消签名",
+		"signFailed": "签名失败，请稍后重试",
+		"invalidAddress": "请输入有效的钱包地址",
+		"insufficientBalanceFee": "余额不足（需要额外 {fee} token 手续费）",
+		"invalidLimit": "请输入有效的限额（可为 0）",
+		"setPerTxFailed": "设置单笔上限失败",
+		"setDailyFailed": "设置日上限失败",
+		"loadTicketsFailed": "加载票据失败",
+		"claimFailed": "领取失败",
+		"cancelFailed": "取消失败",
+		"loadQueueFailed": "加载审批队列失败",
+		"approveTicketFailed": "批准失败",
+		"rejectTicketFailed": "拒绝失败",
+		"amountMustExceedTax": "转账金额必须严格大于固定税 {tax}"
+	}
+}

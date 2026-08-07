@@ -76,7 +76,15 @@ export {
 
 export { useV3Mint, type UseV3MintReturn } from "./useV3Mint";
 
-export { useV3Transfer, type UseV3TransferReturn } from "./useV3Transfer";
+export {
+	useV3TransferWithAuth,
+	type UseV3TransferWithAuthReturn,
+} from "./useV3TransferWithAuth";
+
+export {
+	useV3TransferFlow,
+	type UseV3TransferFlowReturn,
+} from "./useV3TransferFlow";
 
 export {
 	useV3LimitInfo,

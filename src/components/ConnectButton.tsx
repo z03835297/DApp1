@@ -2,6 +2,7 @@
 
 import { ConnectButton as RKConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { ChainId } from "@/lib/constants";
 
 /**
@@ -13,6 +14,8 @@ import { ChainId } from "@/lib/constants";
  * - 已连接：点击弹出账户弹窗（查看 / 断开）
  */
 export default function ConnectButton() {
+	const t = useTranslations("connectButton");
+
 	return (
 		<RKConnectButton.Custom>
 			{({
@@ -40,7 +43,7 @@ export default function ConnectButton() {
 							}}
 						>
 							<button type="button" className={`${baseClass} bg-white text-indigo-600`}>
-								连接钱包
+								{t("connectWallet")}
 							</button>
 						</div>
 					);
@@ -53,7 +56,7 @@ export default function ConnectButton() {
 							onClick={openConnectModal}
 							className={`${baseClass} bg-white text-indigo-600 hover:bg-indigo-50`}
 						>
-							连接钱包
+							{t("connectWallet")}
 						</button>
 					);
 				}
@@ -65,7 +68,7 @@ export default function ConnectButton() {
 							onClick={openChainModal}
 							className={`${baseClass} bg-red-500 text-white hover:bg-red-600`}
 						>
-							切换网络
+							{t("switchNetwork")}
 						</button>
 					);
 				}
@@ -97,7 +100,7 @@ export default function ConnectButton() {
 							<span>{chain.name}</span>
 							{isTestnet && (
 								<span className="rounded-full bg-amber-400/90 px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none tracking-wide text-amber-950">
-									Test
+									{t("test")}
 								</span>
 							)}
 						</button>

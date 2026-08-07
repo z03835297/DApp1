@@ -13,6 +13,7 @@ import {
 	fetchTicketsFromChain,
 	type V3Ticket,
 } from "@/lib/v3/tickets";
+import { useTranslations } from "next-intl";
 
 export interface UseV3AdminQueueReturn {
 	tickets: V3Ticket[];
@@ -30,6 +31,7 @@ export interface UseV3AdminQueueReturn {
  * Admin 视角：全量赎回队列 + approve / reject
  */
 export function useV3AdminQueue(): UseV3AdminQueueReturn {
+	const t = useTranslations("errors");
 	const [tickets, setTickets] = useState<V3Ticket[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isActing, setIsActing] = useState(false);
@@ -65,11 +67,11 @@ export function useV3AdminQueue(): UseV3AdminQueueReturn {
 			setTickets(results);
 		} catch (err) {
 			console.error("Failed to fetch admin queue:", err);
-			setError(getErrorMessage(err, "加载审批队列失败"));
+			setError(getErrorMessage(err, t("loadQueueFailed")));
 		} finally {
 			setIsLoading(false);
 		}
-	}, [queueContract, tokenContract, isConnected, isReady]);
+	}, [queueContract, tokenContract, isConnected, isReady, t]);
 
 	useEffect(() => {
 		refresh();
@@ -78,7 +80,7 @@ export function useV3AdminQueue(): UseV3AdminQueueReturn {
 	const approve = useCallback(
 		async (ticketId: string): Promise<boolean> => {
 			if (!queueAddress || !queueAbi) {
-				setError("RedeemQueue 未初始化");
+				setError(t("queueNotInit"));
 				return false;
 			}
 
@@ -88,7 +90,7 @@ export function useV3AdminQueue(): UseV3AdminQueueReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 				const queue = new Contract(queueAddress, queueAbi, signer);
@@ -98,19 +100,19 @@ export function useV3AdminQueue(): UseV3AdminQueueReturn {
 				return true;
 			} catch (err) {
 				console.error("approve failed:", err);
-				setError(getErrorMessage(err, "Approve 失败"));
+				setError(getErrorMessage(err, t("approveTicketFailed")));
 				return false;
 			} finally {
 				setIsActing(false);
 			}
 		},
-		[queueAddress, queueAbi, getSigner, refresh],
+		[queueAddress, queueAbi, getSigner, refresh, t],
 	);
 
 	const reject = useCallback(
 		async (ticketId: string): Promise<boolean> => {
 			if (!queueAddress || !queueAbi) {
-				setError("RedeemQueue 未初始化");
+				setError(t("queueNotInit"));
 				return false;
 			}
 
@@ -120,7 +122,7 @@ export function useV3AdminQueue(): UseV3AdminQueueReturn {
 			try {
 				const signer = await getSigner();
 				if (!signer) {
-					setError("无法获取签名器，请确保钱包已连接");
+					setError(t("noSigner"));
 					return false;
 				}
 				const queue = new Contract(queueAddress, queueAbi, signer);
@@ -130,13 +132,13 @@ export function useV3AdminQueue(): UseV3AdminQueueReturn {
 				return true;
 			} catch (err) {
 				console.error("reject failed:", err);
-				setError(getErrorMessage(err, "Reject 失败"));
+				setError(getErrorMessage(err, t("rejectTicketFailed")));
 				return false;
 			} finally {
 				setIsActing(false);
 			}
 		},
-		[queueAddress, queueAbi, getSigner, refresh],
+		[queueAddress, queueAbi, getSigner, refresh, t],
 	);
 
 	const pendingTickets = tickets.filter(

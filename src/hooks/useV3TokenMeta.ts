@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { formatUnits } from "ethers";
+import { readTokenTax } from "@/lib/v3/tax";
 import { useV3TokenContract, useV3UsdtContract } from "./useV3Contract";
 
 export interface TokenMeta {
@@ -56,7 +57,7 @@ export function useV3TokenMeta(): UseV3TokenMetaReturn {
 				usdtContract.name(),
 				usdtContract.symbol(),
 				usdtContract.decimals(),
-				tokenContract.taxAmount(),
+				readTokenTax(tokenContract),
 				tokenContract.paused(),
 			]);
 
@@ -74,7 +75,7 @@ export function useV3TokenMeta(): UseV3TokenMetaReturn {
 			setTaxAmount(formatUnits(tax, dec));
 			setPaused(Boolean(isPaused));
 		} catch (error) {
-			console.error("Failed to fetch V3 token meta:", error);
+			console.warn("Failed to fetch V3 token meta:", error);
 		} finally {
 			setIsLoading(false);
 		}

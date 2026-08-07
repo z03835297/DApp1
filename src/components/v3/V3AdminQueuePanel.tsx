@@ -1,16 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useV3AdminQueue } from "@/hooks";
 import { V3TicketStatus } from "@/lib/type";
-
-const STATUS_LABEL: Record<V3TicketStatus, string> = {
-	[V3TicketStatus.None]: "None",
-	[V3TicketStatus.Pending]: "Pending",
-	[V3TicketStatus.Approved]: "Approved",
-	[V3TicketStatus.Claimed]: "Claimed",
-	[V3TicketStatus.Cancelled]: "Cancelled",
-	[V3TicketStatus.Rejected]: "Rejected",
-};
 
 const STATUS_COLOR: Record<V3TicketStatus, string> = {
 	[V3TicketStatus.None]: "text-zinc-400",
@@ -21,11 +13,23 @@ const STATUS_COLOR: Record<V3TicketStatus, string> = {
 	[V3TicketStatus.Rejected]: "text-red-400",
 };
 
+const STATUS_KEYS: Record<V3TicketStatus, string> = {
+	[V3TicketStatus.None]: "None",
+	[V3TicketStatus.Pending]: "Pending",
+	[V3TicketStatus.Approved]: "Approved",
+	[V3TicketStatus.Claimed]: "Claimed",
+	[V3TicketStatus.Cancelled]: "Cancelled",
+	[V3TicketStatus.Rejected]: "Rejected",
+};
+
 function shortAddr(addr: string) {
 	return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
 export default function V3AdminQueuePanel() {
+	const t = useTranslations("v3.adminQueuePanel");
+	const tStatus = useTranslations("ticketStatus");
+	const tCommon = useTranslations("common");
 	const {
 		tickets,
 		pendingTickets,
@@ -41,10 +45,9 @@ export default function V3AdminQueuePanel() {
 		<div className="bg-gradient-to-br from-zinc-900 to-zinc-800 rounded-2xl border border-zinc-700/50 p-6 space-y-6">
 			<div className="flex items-start justify-between">
 				<div>
-					<h3 className="text-lg font-bold text-white">审批队列</h3>
+					<h3 className="text-lg font-bold text-white">{t("title")}</h3>
 					<p className="text-sm text-zinc-400 mt-1">
-						Pending 票据可 approve / reject（当前 Pending：
-						{pendingTickets.length}）
+						{t("description", { count: pendingTickets.length })}
 					</p>
 				</div>
 				<button
@@ -53,7 +56,7 @@ export default function V3AdminQueuePanel() {
 					disabled={isLoading}
 					className="text-xs text-violet-400 hover:text-violet-300 disabled:opacity-50"
 				>
-					{isLoading ? "加载中..." : "刷新"}
+					{isLoading ? t("loading") : tCommon("refresh")}
 				</button>
 			</div>
 
@@ -64,32 +67,34 @@ export default function V3AdminQueuePanel() {
 			)}
 
 			{isLoading && tickets.length === 0 ? (
-				<p className="text-sm text-zinc-500 text-center py-8">加载队列中...</p>
+				<p className="text-sm text-zinc-500 text-center py-8">
+					{t("loadingQueue")}
+				</p>
 			) : tickets.length === 0 ? (
-				<p className="text-sm text-zinc-500 text-center py-8">暂无票据</p>
+				<p className="text-sm text-zinc-500 text-center py-8">{t("empty")}</p>
 			) : (
 				<ul className="space-y-3 max-h-[28rem] overflow-y-auto">
-					{tickets.map((t) => {
-						const isPending = t.status === V3TicketStatus.Pending;
+					{tickets.map((ticket) => {
+						const isPending = ticket.status === V3TicketStatus.Pending;
 						return (
 							<li
-								key={t.ticketId}
+								key={ticket.ticketId}
 								className="bg-zinc-800/40 border border-zinc-700/40 rounded-xl p-4 space-y-3"
 							>
 								<div className="flex items-center justify-between">
 									<span className="text-sm font-semibold text-white">
-										#{t.ticketId}
+										#{ticket.ticketId}
 									</span>
 									<span
-										className={`text-xs font-medium ${STATUS_COLOR[t.status]}`}
+										className={`text-xs font-medium ${STATUS_COLOR[ticket.status]}`}
 									>
-										{STATUS_LABEL[t.status]}
+										{tStatus(STATUS_KEYS[ticket.status])}
 									</span>
 								</div>
 								<div className="text-sm text-zinc-300 space-y-1">
-									<p>金额：{t.amount}</p>
+									<p>{t("amount", { amount: ticket.amount })}</p>
 									<p className="font-mono text-xs text-zinc-500">
-										Owner：{shortAddr(t.owner)}
+										{t("owner", { address: shortAddr(ticket.owner) })}
 									</p>
 								</div>
 								{isPending && (
@@ -97,18 +102,18 @@ export default function V3AdminQueuePanel() {
 										<button
 											type="button"
 											disabled={isActing}
-											onClick={() => approve(t.ticketId)}
+											onClick={() => approve(ticket.ticketId)}
 											className="flex-1 py-2 rounded-lg text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50"
 										>
-											Approve
+											{t("approve")}
 										</button>
 										<button
 											type="button"
 											disabled={isActing}
-											onClick={() => reject(t.ticketId)}
+											onClick={() => reject(ticket.ticketId)}
 											className="flex-1 py-2 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-500 disabled:opacity-50"
 										>
-											Reject
+											{t("reject")}
 										</button>
 									</div>
 								)}
