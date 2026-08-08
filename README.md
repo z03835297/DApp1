@@ -96,7 +96,11 @@ Docker 构建**要求**宿主机项目根目录已有真实的 **`contracts.json
 
 更多说明见 `Dockerfile` 与 `docker-compose.yml` 内注释。
 
-## Cloudflare Pages 等托管平台部署
+## Cloudflare Pages 部署
+
+本应用没有任何 API 路由 / middleware / 动态路由参数，纯客户端渲染（wagmi + RainbowKit，后端 API 通过 `NEXT_PUBLIC_API_URL` 由浏览器直连外部服务），因此**不需要** Cloudflare Pages 的 Workers/Functions（SSR）能力，也**不要**使用框架预设默认建议的 `@cloudflare/next-on-pages`（该适配器对 Next.js 新版本支持不稳定，且本项目依赖的 `pino` / `thread-stream` 等 Node 原生模块在 Workers 运行时里无法运行）。改用纯静态导出即可，`next.config.ts` 已经处理好：检测到 Cloudflare Pages 构建时自动注入的 `CF_PAGES=1` 环境变量后，会把 `output` 切到 `"export"`（本地 / Docker 不受影响，仍是 `"standalone"`）。
+
+### `contracts.json` 从哪来
 
 `contracts.json` 未提交到仓库，而 Cloudflare Pages 是直接从 Git 拉代码构建，没有机会像本地/Docker 那样手动放一份文件进去。为此新增了 `scripts/gen-contracts.mjs`，会在 `bun run build`（即 `next build`）之前自动执行：
 
@@ -104,14 +108,27 @@ Docker 构建**要求**宿主机项目根目录已有真实的 **`contracts.json
 - 否则读取 **`CONTRACTS_JSON`** 环境变量（值为 `contracts.json` 的完整 JSON 内容，可压缩成一行）并据此生成该文件；
 - 两者都没有时会跳过生成，随后 `next.config.ts` 会给出明确的报错提示。
 
-部署步骤：
+### Cloudflare Pages 项目设置该填什么
 
-1. 在 Cloudflare Pages 项目的 **Settings → Environment variables**（Production / Preview 都要配）新增一个变量 `CONTRACTS_JSON`，值粘贴 `contracts.json` 的完整内容（一整段 JSON 字符串，无需转义引号，Cloudflare 会原样存成字符串）。
-2. 同时按需配置 `NEXT_PUBLIC_API_URL`（否则默认走 `http://localhost:3000`，在线上通常不是你想要的）。
-3. Build command 保持 `bun run build`（该脚本用 `bun` 而非 `node` 执行 `gen-contracts.mjs`，是为了本地用 `.env.local` 模拟时也能读到变量；生产环境需要构建环境里有 `bun` 可用，Cloudflare Pages 检测到仓库有 `bun.lock` 时会自动安装并使用 bun，无需额外配置）。Cloudflare 会先跑 `gen-contracts.mjs` 生成 `contracts.json`，再执行 `next build`，合约地址会像本地一样被打进产物里。
-4. 之后如需更换合约地址，直接修改 Cloudflare 项目里的 `CONTRACTS_JSON` 环境变量并触发重新部署即可（无需改代码、无需提交 `contracts.json`）。
+创建 /编辑项目时，**Build settings** 里：
 
-> 合约地址属于公开信息（本身就在链上可查），放进环境变量或打进前端 bundle 都没有额外的安全风险，这里的“环境变量”只是解决托管平台构建时缺文件的问题，并非做敏感信息保密。
+| 字段 | 填什么 |
+|------|--------|
+| Framework preset | `Next.js` 或 `None` 都可以（预设只是帮你填默认值，实际用下面手动填的覆盖即可） |
+| Build command | `bun run build`（**不要**用默认的 `npx @cloudflare/next-on-pages@1`） |
+| Build output directory | `out` |
+| Root directory | 留空（项目就在仓库根目录） |
+
+**Environment variables**（Production / Preview 都要配一遍）：
+
+| 变量名 | 值 |
+|--------|-----|
+| `CONTRACTS_JSON` | `contracts.json` 的完整 JSON 内容（整段粘贴，多行也没问题） |
+| `NEXT_PUBLIC_API_URL` | 线上后端 API 地址（不配默认是 `http://localhost:3000`，线上基本不是你想要的） |
+
+保存后需要**触发一次新的部署**才会生效（改环境变量不会让已有部署自动重新构建）。之后如需更换合约地址，直接改 `CONTRACTS_JSON` 变量重新部署即可，不用改代码、不用提交 `contracts.json`。
+
+> 合约地址属于公开信息（本身就在链上可查），放进环境变量或打进前端 bundle 都没有额外的安全风险，这里的"环境变量"只是解决托管平台构建时缺文件的问题，并非做敏感信息保密。
 
 ## 项目结构（节选）
 
